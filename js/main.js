@@ -1,5 +1,5 @@
 // Main entry point - Initialize Phaser and start the game
-document.addEventListener('DOMContentLoaded', () => {
+function initGame() {
     // Phaser game configuration
     const config = {
         type: Phaser.AUTO,
@@ -150,4 +150,12 @@ document.addEventListener('DOMContentLoaded', () => {
     
     console.log('🌱 Growtopia farming simulation loaded!');
     console.log('Start farming and grow your empire! 🚜');
+}
+
+// Make initGame available globally
+window.initGame = initGame;
+
+// Don't auto-start the game - wait for start button
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('🌾 Growtopia loaded - click Start Gardening to begin!');
 });

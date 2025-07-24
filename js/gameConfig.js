@@ -152,14 +152,14 @@ const GameConfig = {
             {
                 id: 'plant',
                 title: 'Plant Your Seed',
-                text: 'Click on the empty plot to plant your apple seed.',
+                text: 'Click to plant your seed. Today\'s weather affects your plant\'s growth!',
                 action: 'plant_seed',
                 highlight: 'plot'
             },
             {
                 id: 'water',
                 title: 'Water Your Plant',
-                text: 'Click on your planted seed to water it. Plants need water to grow!',
+                text: 'Water your seed to help it grow. Reach Stage 5 to harvest fruits!',
                 action: 'water_plant',
                 highlight: 'plant'
             },

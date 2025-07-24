@@ -35,6 +35,9 @@ class GameState {
         this.selectedCropType = 'APPLE';
         this.selectedPlot = null;
         
+        // Demo state
+        this.demoCompleted = false;
+        
         // Game timing
         this.gameTick = 0;
         this.isPaused = false;
@@ -93,6 +96,29 @@ class GameState {
         this.resources.harvest += amount;
         this.progression.totalHarvested += amount;
         this.checkLevelUp();
+        
+        // Check for demo completion (after 3 harvests)
+        if (this.progression.totalHarvested >= 3 && !this.demoCompleted) {
+            this.showDemoCompletion();
+        }
+    }
+    
+    showDemoCompletion() {
+        this.demoCompleted = true;
+        setTimeout(() => {
+            const message = `🎉 Demo Complete! 🎉\n\nYou've mastered the basics of Growtopia!\n\n✅ Planted seeds\n✅ Cared for plants\n✅ Harvested fruits\n✅ Used the shop\n\nMore plants, animals, and land coming soon!\n\nWould you like to continue growing?`;
+            
+            if (confirm(message)) {
+                // Continue playing
+                console.log('Player chose to continue growing!');
+            } else {
+                // Restart demo
+                if (confirm('Restart the demo from the beginning?')) {
+                    this.reset();
+                    window.location.reload();
+                }
+            }
+        }, 1000);
     }
     
     // Plot management

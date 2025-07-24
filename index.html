@@ -26,6 +26,56 @@
             border-radius: 8px;
             box-shadow: 0 0 20px rgba(0,0,0,0.5);
         }
+
+        .start-screen {
+            text-align: center;
+            padding: 40px;
+            background: rgba(44, 62, 80, 0.95);
+            border: 4px solid #34495e;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+            max-width: 400px;
+        }
+
+        .game-title {
+            font-size: 24px;
+            color: #f39c12;
+            margin: 0 0 10px 0;
+            text-shadow: 2px 2px 0px #000;
+        }
+
+        .game-subtitle {
+            font-size: 10px;
+            color: #bdc3c7;
+            margin: 0 0 30px 0;
+        }
+
+        .start-button {
+            background: linear-gradient(45deg, #27ae60, #2ecc71);
+            border: 2px solid #1e8449;
+            color: white;
+            padding: 15px 30px;
+            font-size: 12px;
+            font-family: 'Press Start 2P', cursive;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            margin: 0 0 20px 0;
+        }
+
+        .start-button:hover {
+            background: linear-gradient(45deg, #2ecc71, #27ae60);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .onboarding-message {
+            font-size: 8px;
+            color: #ecf0f1;
+            line-height: 1.4;
+            margin: 0;
+        }
         
         .ui-panel {
             position: absolute;
@@ -108,7 +158,17 @@
     </style>
 </head>
 <body>
-    <div id="game-container"></div>
+            <!-- Start Screen -->
+        <div id="start-screen" class="start-screen">
+            <div class="start-content">
+                <h1 class="game-title">🌾 Growtopia</h1>
+                <p class="game-subtitle">Farming Simulation Game</p>
+                <button id="start-button" class="start-button">🌱 Start Gardening</button>
+                <p class="onboarding-message">Welcome! Plant your first seed and grow a tree by taking care of its needs.</p>
+            </div>
+        </div>
+
+        <div id="game-container" style="display: none;"></div>
     
     <!-- UI Panels -->
     <div id="resources-panel" class="ui-panel" style="top: 10px; left: 10px; width: 180px;">
@@ -234,6 +294,29 @@
                 window.tutorialSystem.resetTutorial();
             }
         }
+
+        // Start screen functionality
+        document.addEventListener('DOMContentLoaded', () => {
+            const startButton = document.getElementById('start-button');
+            const startScreen = document.getElementById('start-screen');
+            const gameContainer = document.getElementById('game-container');
+            
+            startButton.addEventListener('click', () => {
+                startScreen.style.display = 'none';
+                gameContainer.style.display = 'block';
+                
+                // Initialize the game after a short delay
+                setTimeout(() => {
+                    if (window.phaserGame) {
+                        // Game already exists, just resume
+                        window.phaserGame.scene.resume('GameScene');
+                    } else {
+                        // Create the game for the first time
+                        window.main && window.main.initGame && window.main.initGame();
+                    }
+                }, 100);
+            });
+        });
     </script>
 </body>
 </html>

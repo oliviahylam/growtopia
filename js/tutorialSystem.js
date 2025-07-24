@@ -26,9 +26,9 @@ class TutorialSystem {
         this.createTutorialOverlay();
         this.showCurrentStep();
         
-        // Give player starting resources for tutorial
-        window.gameState.resources.leafCoins = GameConfig.currency.startingAmount;
-        window.gameState.inventory.seeds.APPLE = 1;
+        // Give player starting resources for tutorial (demo specific)
+        window.gameState.resources.leafCoins = 10;  // Demo requirement: 10 Leaf Coins
+        window.gameState.resources.seeds = 1;       // Demo requirement: 1 Apple Seed
     }
     
     createTutorialOverlay() {
