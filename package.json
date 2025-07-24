@@ -1,0 +1,34 @@
+{
+  "name": "growtopia-farming-game",
+  "version": "1.0.0",
+  "description": "A pixel-style farming game built with Phaser.js that integrates real weather data",
+  "main": "index.html",
+  "scripts": {
+    "start": "python -m http.server 8000",
+    "serve": "python3 -m http.server 8000",
+    "dev": "npx http-server . -p 8000 -o"
+  },
+  "keywords": [
+    "phaser",
+    "game",
+    "farming",
+    "pixel-art",
+    "weather",
+    "javascript"
+  ],
+  "author": "Growtopia Team",
+  "license": "MIT",
+  "devDependencies": {},
+  "dependencies": {},
+  "engines": {
+    "node": ">=12.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/growtopia-farming-game.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/growtopia-farming-game/issues"
+  },
+  "homepage": "https://github.com/your-username/growtopia-farming-game#readme"
+}
