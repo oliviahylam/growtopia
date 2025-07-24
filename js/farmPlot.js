@@ -189,38 +189,38 @@ class FarmPlotRenderer {
     }
     
     drawCrop(container, plot) {
-        if (!plot.plant) return;
+        if (!plot.crop) return;
         
         const centerX = GameConfig.plotSize / 2;
         const centerY = GameConfig.plotSize / 2;
         
-        // Get the appropriate asset based on plant stage
-        let assetName;
-        switch (plot.plant.stage) {
-            case GameConfig.growthStages.SEED:
-                assetName = 'apple_seed';
-                break;
-            case GameConfig.growthStages.SPROUT:
-                assetName = 'apple_sprout';
-                break;
-            case GameConfig.growthStages.SMALL_TREE:
-                assetName = 'apple_small_tree';
-                break;
-            case GameConfig.growthStages.BIG_TREE:
-                assetName = 'apple_big_tree';
-                break;
-            case GameConfig.growthStages.FRUITING:
-                assetName = 'apple_fruiting_tree';
-                break;
-            case GameConfig.growthStages.SICK:
-                assetName = 'apple_sick';
-                break;
-            case GameConfig.growthStages.DEAD:
-                assetName = 'apple_dead';
-                break;
-            default:
-                assetName = 'apple_seed';
-        }
+                 // Get the appropriate asset based on crop stage
+         let assetName;
+         switch (plot.crop.stage) {
+             case GameConfig.growthStages.SEED:
+                 assetName = 'apple_seed';
+                 break;
+             case GameConfig.growthStages.SPROUT:
+                 assetName = 'apple_sprout';
+                 break;
+             case GameConfig.growthStages.SMALL_TREE:
+                 assetName = 'apple_small_tree';
+                 break;
+             case GameConfig.growthStages.BIG_TREE:
+                 assetName = 'apple_big_tree';
+                 break;
+             case GameConfig.growthStages.FRUITING:
+                 assetName = 'apple_fruiting_tree';
+                 break;
+             case GameConfig.growthStages.SICK:
+                 assetName = 'apple_sick';
+                 break;
+             case GameConfig.growthStages.DEAD:
+                 assetName = 'apple_dead';
+                 break;
+             default:
+                 assetName = 'apple_seed';
+         }
         
         // Create image from asset
         const asset = window.assetRenderer.getAsset(assetName);
@@ -229,15 +229,15 @@ class FarmPlotRenderer {
             plantImage.setTexture(this.scene.textures.addBase64('plant_' + plot.id, asset));
             plantImage.setDisplaySize(GameConfig.plotSize * 0.8, GameConfig.plotSize * 0.8);
             
-            // Health-based tinting
-            const healthTint = this.getHealthTint(plot.plant.health);
-            plantImage.setTint(healthTint);
-            
-            // Growth animation - slight bob for growing plants
-            if (plot.plant.stage > GameConfig.growthStages.SEED) {
-                const bobOffset = Math.sin(this.scene.time.now * 0.001 + plot.id) * 1;
-                plantImage.y += bobOffset;
-            }
+                         // Health-based tinting
+             const healthTint = this.getHealthTint(plot.crop.health);
+             plantImage.setTint(healthTint);
+             
+             // Growth animation - slight bob for growing plants
+             if (plot.crop.stage > GameConfig.growthStages.SEED) {
+                 const bobOffset = Math.sin(this.scene.time.now * 0.001 + plot.id) * 1;
+                 plantImage.y += bobOffset;
+             }
             
             container.add(plantImage);
         }
@@ -245,10 +245,10 @@ class FarmPlotRenderer {
         // Add environmental effects overlays
         this.addEnvironmentalEffects(container, plot);
         
-        // Add growth progress indicator for growing crops
-        if (plot.plant.stage < GameConfig.growthStages.FRUITING && plot.plant.stage !== GameConfig.growthStages.DEAD) {
-            this.drawGrowthProgress(container, plot);
-        }
+                 // Add growth progress indicator for growing crops
+         if (plot.crop.stage < GameConfig.growthStages.FRUITING && plot.crop.stage !== GameConfig.growthStages.DEAD) {
+             this.drawGrowthProgress(container, plot);
+         }
     }
     
     getHealthTint(health) {
@@ -319,25 +319,28 @@ class FarmPlotRenderer {
         }
     }
     
-    drawGrowthProgress(container, plot) {
-        const progress = window.cropSystem.getGrowthProgress(plot.crop);
-        const barWidth = 40;
-        const barHeight = 4;
-        const x = (GameConfig.plotSize - barWidth) / 2;
-        const y = GameConfig.plotSize - 12;
-        
-        // Background
-        const bgBar = this.scene.add.graphics();
-        bgBar.fillStyle(0x000000, 0.5);
-        bgBar.fillRect(x, y, barWidth, barHeight);
-        container.add(bgBar);
-        
-        // Progress
-        const progBar = this.scene.add.graphics();
-        progBar.fillStyle(0x00FF00);
-        progBar.fillRect(x, y, barWidth * progress, barHeight);
-        container.add(progBar);
-    }
+         drawGrowthProgress(container, plot) {
+         // Calculate growth progress manually
+         const cropConfig = GameConfig.plantTypes.APPLE; // Using apple for now
+         const progress = Math.min(1, plot.crop.growthProgress / cropConfig.growthTime);
+         
+         const barWidth = 40;
+         const barHeight = 4;
+         const x = (GameConfig.plotSize - barWidth) / 2;
+         const y = GameConfig.plotSize - 12;
+         
+         // Background
+         const bgBar = this.scene.add.graphics();
+         bgBar.fillStyle(0x000000, 0.5);
+         bgBar.fillRect(x, y, barWidth, barHeight);
+         container.add(bgBar);
+         
+         // Progress
+         const progBar = this.scene.add.graphics();
+         progBar.fillStyle(0x00FF00);
+         progBar.fillRect(x, y, barWidth * progress, barHeight);
+         container.add(progBar);
+     }
     
     drawOverlays(graphic, plot) {
         // Water level visualization

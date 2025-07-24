@@ -7,8 +7,8 @@ class GameState {
     reset() {
         // Player resources
         this.resources = {
-            coins: 100,
-            seeds: 10,
+            leafCoins: GameConfig.currency.startingAmount,
+            seeds: 1, // Start with 1 apple seed
             harvest: 0,
             fertilizer: 0,
             sprinklers: 0
@@ -32,7 +32,7 @@ class GameState {
         };
         
         // Current selections
-        this.selectedCropType = 'WHEAT';
+        this.selectedCropType = 'APPLE';
         this.selectedPlot = null;
         
         // Game timing
@@ -61,19 +61,19 @@ class GameState {
     
     // Resource management
     canAfford(cost) {
-        return this.resources.coins >= cost;
+        return this.resources.leafCoins >= cost;
     }
     
     spendCoins(amount) {
         if (this.canAfford(amount)) {
-            this.resources.coins -= amount;
+            this.resources.leafCoins -= amount;
             return true;
         }
         return false;
     }
     
     earnCoins(amount) {
-        this.resources.coins += amount;
+        this.resources.leafCoins += amount;
         this.progression.totalEarned += amount;
     }
     
@@ -111,16 +111,16 @@ class GameState {
         return null;
     }
     
-    plantCrop(plotIndex, cropType) {
+    plantCrop(plotIndex, cropType = 'APPLE') {
         const plot = this.getPlot(plotIndex);
         if (!plot || !plot.isUnlocked || plot.crop) return false;
         
-        const cropConfig = GameConfig.cropTypes[cropType];
+        const cropConfig = GameConfig.plantTypes[cropType];
         if (!cropConfig || !this.useSeeds(1)) return false;
         
         plot.crop = {
             type: cropType,
-            stage: GameConfig.cropStages.SEED,
+            stage: GameConfig.growthStages.SEED,
             growthProgress: 0,
             plantedAt: this.gameTick,
             health: 1.0
@@ -131,14 +131,14 @@ class GameState {
     
     harvestCrop(plotIndex) {
         const plot = this.getPlot(plotIndex);
-        if (!plot || !plot.crop || plot.crop.stage !== GameConfig.cropStages.READY) {
+        if (!plot || !plot.crop || plot.crop.stage !== GameConfig.growthStages.FRUITING) {
             return false;
         }
         
-        const cropConfig = GameConfig.cropTypes[plot.crop.type];
+        const cropConfig = GameConfig.plantTypes[plot.crop.type];
         const baseYield = cropConfig.baseYield;
         const healthMultiplier = plot.crop.health;
-        const fertilizerMultiplier = plot.fertilized ? GameConfig.shopItems.FERTILIZER.effect : 1;
+        const fertilizerMultiplier = plot.fertilized ? 1.5 : 1; // Simple fertilizer effect
         
         const yield = Math.floor(baseYield * healthMultiplier * fertilizerMultiplier);
         const earnings = yield * cropConfig.sellPrice;
@@ -229,9 +229,9 @@ class GameState {
     
     updateCrop(plot) {
         const crop = plot.crop;
-        const cropConfig = GameConfig.cropTypes[crop.type];
+        const cropConfig = GameConfig.plantTypes[crop.type];
         
-        if (crop.stage >= GameConfig.cropStages.READY) return;
+        if (crop.stage >= GameConfig.growthStages.FRUITING) return;
         
         // Calculate growth rate based on conditions
         let growthRate = 1.0;
@@ -245,8 +245,10 @@ class GameState {
         // Weather effects (from weather system)
         if (window.weatherSystem) {
             const weather = window.weatherSystem.getCurrentWeather();
-            growthRate *= weather.effects.growthMultiplier;
-            plot.waterLevel -= weather.effects.waterEvaporation;
+            if (weather && weather.effects) {
+                growthRate *= weather.effects.growthMultiplier;
+                plot.waterLevel -= weather.effects.waterEvaporation;
+            }
         }
         
         // Fertilizer bonus
@@ -263,16 +265,26 @@ class GameState {
         // Clamp water level
         plot.waterLevel = Math.max(0, Math.min(1.0, plot.waterLevel));
         
-        // Check for stage advancement
+        // Check for stage advancement using new growth stages
         const stageThreshold = cropConfig.growthTime / 4; // 4 stages after seed
         if (crop.growthProgress >= cropConfig.growthTime) {
-            crop.stage = GameConfig.cropStages.READY;
+            crop.stage = GameConfig.growthStages.FRUITING;
         } else if (crop.growthProgress >= stageThreshold * 3) {
-            crop.stage = GameConfig.cropStages.MATURE;
+            crop.stage = GameConfig.growthStages.BIG_TREE;
         } else if (crop.growthProgress >= stageThreshold * 2) {
-            crop.stage = GameConfig.cropStages.GROWING;
+            crop.stage = GameConfig.growthStages.SMALL_TREE;
         } else if (crop.growthProgress >= stageThreshold) {
-            crop.stage = GameConfig.cropStages.SPROUT;
+            crop.stage = GameConfig.growthStages.SPROUT;
+        }
+        
+        // Check for sickness due to poor care
+        if (crop.health < 0.3 && Math.random() < 0.05) {
+            crop.stage = GameConfig.growthStages.SICK;
+        }
+        
+        // Death from extreme neglect
+        if (crop.health < 0.1) {
+            crop.stage = GameConfig.growthStages.DEAD;
         }
     }
     
@@ -295,7 +307,7 @@ class GameState {
             this.resources = { ...this.resources, ...data.resources };
             this.farm = { ...this.farm, ...data.farm };
             this.progression = { ...this.progression, ...data.progression };
-            this.selectedCropType = data.selectedCropType || 'WHEAT';
+            this.selectedCropType = data.selectedCropType || 'APPLE';
             this.gameTick = data.gameTick || 0;
             return true;
         }

@@ -2,16 +2,19 @@
 class UIManager {
     constructor() {
         this.elements = {
-            coins: document.getElementById('coins'),
-            seeds: document.getElementById('seeds'),
-            harvest: document.getElementById('harvest'),
+            leafCoins: document.getElementById('leaf-coins'),
+            appleSeeds: document.getElementById('apple-seeds'),
+            fruitsHarvested: document.getElementById('fruits-harvested'),
+            experience: document.getElementById('experience'),
+            level: document.getElementById('level'),
             weatherInfo: document.getElementById('weather-info'),
             temperature: document.getElementById('temperature'),
             humidity: document.getElementById('humidity'),
-            buySeeds: document.getElementById('buy-seeds'),
-            buyFertilizer: document.getElementById('buy-fertilizer'),
+            buyAppleSeeds: document.getElementById('buy-apple-seeds'),
+            buyWateringCan: document.getElementById('buy-watering-can'),
             buySprinkler: document.getElementById('buy-sprinkler'),
-            expandFarm: document.getElementById('expand-farm')
+            buyGreenhouse: document.getElementById('buy-greenhouse'),
+            buyChicken: document.getElementById('buy-chicken')
         };
         
         this.setupEventListeners();
@@ -27,20 +30,14 @@ class UIManager {
     
     setupEventListeners() {
         // Shop buttons
-        this.elements.buySeeds.addEventListener('click', () => this.buySeeds());
-        this.elements.buyFertilizer.addEventListener('click', () => this.buyFertilizer());
+        this.elements.buyAppleSeeds.addEventListener('click', () => this.buyAppleSeeds());
+        this.elements.buyWateringCan.addEventListener('click', () => this.buyWateringCan());
         this.elements.buySprinkler.addEventListener('click', () => this.buySprinkler());
-        this.elements.expandFarm.addEventListener('click', () => this.expandFarm());
+        this.elements.buyGreenhouse.addEventListener('click', () => this.buyGreenhouse());
+        this.elements.buyChicken.addEventListener('click', () => this.buyChicken());
         
         // Keyboard shortcuts
         document.addEventListener('keydown', (e) => this.handleKeyPress(e));
-        
-        // Crop selection (could add buttons for this)
-        document.addEventListener('keydown', (e) => {
-            if (e.key === '1') window.gameState.selectedCropType = 'WHEAT';
-            if (e.key === '2') window.gameState.selectedCropType = 'TOMATO';
-            if (e.key === '3') window.gameState.selectedCropType = 'CORN';
-        });
     }
     
     handleKeyPress(e) {
@@ -115,28 +112,27 @@ class UIManager {
         }
     }
     
-    buySeeds() {
-        const cost = GameConfig.shopItems.SEEDS.cost;
-        const quantity = GameConfig.shopItems.SEEDS.quantity;
+    buyAppleSeeds() {
+        const cost = GameConfig.shopItems.APPLE_SEED.cost;
         
         if (window.gameState.spendCoins(cost)) {
-            window.gameState.addSeeds(quantity);
-            this.showNotification(`Bought ${quantity} seeds for ${cost} coins!`, 'success');
+            window.gameState.addSeeds(1);
+            this.showNotification(`Bought apple seed for ${cost} leaf coins!`, 'success');
             this.updateUI();
         } else {
-            this.showNotification('Not enough coins!', 'error');
+            this.showNotification('Not enough leaf coins!', 'error');
         }
     }
     
-    buyFertilizer() {
-        const cost = GameConfig.shopItems.FERTILIZER.cost;
+    buyWateringCan() {
+        const cost = GameConfig.shopItems.WATERING_CAN.cost;
         
         if (window.gameState.spendCoins(cost)) {
-            window.gameState.resources.fertilizer++;
-            this.showNotification('Bought fertilizer!', 'success');
+            window.gameState.resources.wateringCans = (window.gameState.resources.wateringCans || 0) + 1;
+            this.showNotification('Bought watering can!', 'success');
             this.updateUI();
         } else {
-            this.showNotification('Not enough coins!', 'error');
+            this.showNotification('Not enough leaf coins!', 'error');
         }
     }
     
@@ -144,24 +140,35 @@ class UIManager {
         const cost = GameConfig.shopItems.SPRINKLER.cost;
         
         if (window.gameState.spendCoins(cost)) {
-            window.gameState.resources.sprinklers++;
+            window.gameState.resources.sprinklers = (window.gameState.resources.sprinklers || 0) + 1;
             this.showNotification('Bought sprinkler! Click a plot to install.', 'success');
             this.updateUI();
         } else {
-            this.showNotification('Not enough coins!', 'error');
+            this.showNotification('Not enough leaf coins!', 'error');
         }
     }
     
-    expandFarm() {
-        if (window.gameState.expandFarm()) {
-            this.showNotification('Farm expanded!', 'success');
-            // Update visuals
-            if (window.gameScene && window.gameScene.farmRenderer) {
-                window.gameScene.farmRenderer.updateAllPlots();
-            }
+    buyGreenhouse() {
+        const cost = GameConfig.shopItems.GREENHOUSE.cost;
+        
+        if (window.gameState.spendCoins(cost)) {
+            window.gameState.resources.greenhouses = (window.gameState.resources.greenhouses || 0) + 1;
+            this.showNotification('Bought greenhouse! Click a plot to install.', 'success');
             this.updateUI();
         } else {
-            this.showNotification('Not enough coins!', 'error');
+            this.showNotification('Not enough leaf coins!', 'error');
+        }
+    }
+    
+    buyChicken() {
+        const cost = GameConfig.shopItems.CHICKEN.cost;
+        
+        if (window.gameState.spendCoins(cost)) {
+            window.gameState.resources.chickens = (window.gameState.resources.chickens || 0) + 1;
+            this.showNotification('Bought chicken helper!', 'success');
+            this.updateUI();
+        } else {
+            this.showNotification('Not enough leaf coins!', 'error');
         }
     }
     
@@ -169,9 +176,11 @@ class UIManager {
         const resources = window.gameState.resources;
         
         // Update resource displays
-        this.elements.coins.textContent = resources.coins;
-        this.elements.seeds.textContent = resources.seeds;
-        this.elements.harvest.textContent = resources.harvest;
+        if (this.elements.leafCoins) this.elements.leafCoins.textContent = resources.leafCoins || resources.coins || 0;
+        if (this.elements.appleSeeds) this.elements.appleSeeds.textContent = resources.seeds || 0;
+        if (this.elements.fruitsHarvested) this.elements.fruitsHarvested.textContent = resources.harvest || 0;
+        if (this.elements.experience) this.elements.experience.textContent = window.gameState.progression.experience || 0;
+        if (this.elements.level) this.elements.level.textContent = window.gameState.progression.level || 1;
         
         // Update button states
         this.updateButtonStates();
@@ -181,20 +190,22 @@ class UIManager {
     }
     
     updateButtonStates() {
-        const resources = window.gameState.resources;
-        
         // Enable/disable shop buttons based on resources
-        this.elements.buySeeds.disabled = !window.gameState.canAfford(GameConfig.shopItems.SEEDS.cost);
-        this.elements.buyFertilizer.disabled = !window.gameState.canAfford(GameConfig.shopItems.FERTILIZER.cost);
-        this.elements.buySprinkler.disabled = !window.gameState.canAfford(GameConfig.shopItems.SPRINKLER.cost);
-        this.elements.expandFarm.disabled = !window.gameState.canAfford(GameConfig.shopItems.EXPANSION.cost) ||
-                                           window.gameState.farm.unlockedPlots >= window.gameState.farm.maxPlots;
-        
-        // Update button text with current costs
-        this.elements.buySeeds.textContent = `Buy Seeds (${GameConfig.shopItems.SEEDS.cost}💰)`;
-        this.elements.buyFertilizer.textContent = `Fertilizer (${GameConfig.shopItems.FERTILIZER.cost}💰)`;
-        this.elements.buySprinkler.textContent = `Sprinkler (${GameConfig.shopItems.SPRINKLER.cost}💰)`;
-        this.elements.expandFarm.textContent = `Expand (${GameConfig.shopItems.EXPANSION.cost}💰)`;
+        if (this.elements.buyAppleSeeds) {
+            this.elements.buyAppleSeeds.disabled = !window.gameState.canAfford(GameConfig.shopItems.APPLE_SEED.cost);
+        }
+        if (this.elements.buyWateringCan) {
+            this.elements.buyWateringCan.disabled = !window.gameState.canAfford(GameConfig.shopItems.WATERING_CAN.cost);
+        }
+        if (this.elements.buySprinkler) {
+            this.elements.buySprinkler.disabled = !window.gameState.canAfford(GameConfig.shopItems.SPRINKLER.cost);
+        }
+        if (this.elements.buyGreenhouse) {
+            this.elements.buyGreenhouse.disabled = !window.gameState.canAfford(GameConfig.shopItems.GREENHOUSE.cost);
+        }
+        if (this.elements.buyChicken) {
+            this.elements.buyChicken.disabled = !window.gameState.canAfford(GameConfig.shopItems.CHICKEN.cost);
+        }
     }
     
     updateProgressIndicators() {
