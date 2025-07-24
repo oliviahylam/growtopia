@@ -189,59 +189,133 @@ class FarmPlotRenderer {
     }
     
     drawCrop(container, plot) {
-        const visual = window.cropSystem.getCropVisual(plot.crop);
-        if (!visual) return;
+        if (!plot.plant) return;
         
-        // Create crop sprite/graphic
-        const cropSize = GameConfig.plotSize * visual.size * 0.6;
         const centerX = GameConfig.plotSize / 2;
         const centerY = GameConfig.plotSize / 2;
         
-        // Health-based color tinting
-        const healthColor = window.cropSystem.getHealthColor(plot.crop.health);
-        
-        // Create crop visual
-        const cropGraphic = this.scene.add.graphics();
-        cropGraphic.fillStyle(visual.color);
-        
-        // Different shapes for different stages
-        switch (plot.crop.stage) {
-            case GameConfig.cropStages.SEED:
-                cropGraphic.fillCircle(centerX, centerY + 8, cropSize * 0.3);
+        // Get the appropriate asset based on plant stage
+        let assetName;
+        switch (plot.plant.stage) {
+            case GameConfig.growthStages.SEED:
+                assetName = 'apple_seed';
                 break;
-            case GameConfig.cropStages.SPROUT:
-                cropGraphic.fillCircle(centerX, centerY + 4, cropSize * 0.4);
-                cropGraphic.fillRect(centerX - 2, centerY - 8, 4, 12);
+            case GameConfig.growthStages.SPROUT:
+                assetName = 'apple_sprout';
                 break;
-            case GameConfig.cropStages.GROWING:
-                cropGraphic.fillEllipse(centerX, centerY, cropSize * 0.6, cropSize * 0.8);
+            case GameConfig.growthStages.SMALL_TREE:
+                assetName = 'apple_small_tree';
                 break;
-            case GameConfig.cropStages.MATURE:
-                cropGraphic.fillEllipse(centerX, centerY, cropSize * 0.8, cropSize);
+            case GameConfig.growthStages.BIG_TREE:
+                assetName = 'apple_big_tree';
                 break;
-            case GameConfig.cropStages.READY:
-                // Special ready glow effect
-                cropGraphic.fillStyle(0xFFD700, 0.3);
-                cropGraphic.fillCircle(centerX, centerY, cropSize * 0.7);
-                cropGraphic.fillStyle(visual.color);
-                cropGraphic.fillEllipse(centerX, centerY, cropSize, cropSize * 1.1);
+            case GameConfig.growthStages.FRUITING:
+                assetName = 'apple_fruiting_tree';
                 break;
+            case GameConfig.growthStages.SICK:
+                assetName = 'apple_sick';
+                break;
+            case GameConfig.growthStages.DEAD:
+                assetName = 'apple_dead';
+                break;
+            default:
+                assetName = 'apple_seed';
         }
         
-        // Add health tinting
-        cropGraphic.setTint(healthColor);
-        
-        // Growth animation - slight bob for growing plants
-        if (plot.crop.stage > GameConfig.cropStages.SEED) {
-            const bobOffset = Math.sin(this.scene.time.now * 0.001) * 2;
-            cropGraphic.y += bobOffset;
+        // Create image from asset
+        const asset = window.assetRenderer.getAsset(assetName);
+        if (asset) {
+            const plantImage = this.scene.add.image(centerX, centerY, '');
+            plantImage.setTexture(this.scene.textures.addBase64('plant_' + plot.id, asset));
+            plantImage.setDisplaySize(GameConfig.plotSize * 0.8, GameConfig.plotSize * 0.8);
+            
+            // Health-based tinting
+            const healthTint = this.getHealthTint(plot.plant.health);
+            plantImage.setTint(healthTint);
+            
+            // Growth animation - slight bob for growing plants
+            if (plot.plant.stage > GameConfig.growthStages.SEED) {
+                const bobOffset = Math.sin(this.scene.time.now * 0.001 + plot.id) * 1;
+                plantImage.y += bobOffset;
+            }
+            
+            container.add(plantImage);
         }
         
-        container.add(cropGraphic);
+        // Add environmental effects overlays
+        this.addEnvironmentalEffects(container, plot);
         
         // Add growth progress indicator for growing crops
-        if (plot.crop.stage < GameConfig.cropStages.READY) {
+        if (plot.plant.stage < GameConfig.growthStages.FRUITING && plot.plant.stage !== GameConfig.growthStages.DEAD) {
             this.drawGrowthProgress(container, plot);
+        }
+    }
+    
+    getHealthTint(health) {
+        if (health >= 0.8) return 0xFFFFFF; // Healthy - white
+        if (health >= 0.6) return 0xFFFF99; // Good - light yellow
+        if (health >= 0.4) return 0xFFCC66; // Fair - orange
+        if (health >= 0.2) return 0xFF9966; // Poor - red-orange
+        return 0xFF6666; // Critical - red
+    }
+    
+    addEnvironmentalEffects(container, plot) {
+        const centerX = GameConfig.plotSize / 2;
+        const centerY = GameConfig.plotSize / 2;
+        
+        // Add pollution haze if pollution is high
+        if (plot.pollution > 0.5) {
+            const pollutionAsset = window.assetRenderer.getAsset('pollution_haze');
+            if (pollutionAsset) {
+                const pollutionOverlay = this.scene.add.image(centerX, centerY, '');
+                pollutionOverlay.setTexture(this.scene.textures.addBase64('pollution_' + plot.id, pollutionAsset));
+                pollutionOverlay.setDisplaySize(GameConfig.plotSize, GameConfig.plotSize);
+                pollutionOverlay.setAlpha(plot.pollution * 0.7);
+                container.add(pollutionOverlay);
+            }
+        }
+        
+        // Add pest indicators if pests present
+        if (plot.hasPests) {
+            const bugAsset = window.assetRenderer.getAsset('bug_sprite');
+            if (bugAsset) {
+                const bugSprite = this.scene.add.image(centerX + 20, centerY - 15, '');
+                bugSprite.setTexture(this.scene.textures.addBase64('bug_' + plot.id, bugAsset));
+                bugSprite.setDisplaySize(16, 16);
+                
+                // Bug movement animation
+                this.scene.tweens.add({
+                    targets: bugSprite,
+                    x: centerX - 20,
+                    duration: 2000,
+                    yoyo: true,
+                    repeat: -1,
+                    ease: 'Sine.easeInOut'
+                });
+                
+                container.add(bugSprite);
+            }
+        }
+        
+        // Add water droplets effect if recently watered
+        if (plot.waterLevel > 0.7 && plot.lastWatered === window.gameState.gameTick) {
+            const waterAsset = window.assetRenderer.getAsset('water_droplets');
+            if (waterAsset) {
+                const waterEffect = this.scene.add.image(centerX, centerY, '');
+                waterEffect.setTexture(this.scene.textures.addBase64('water_' + plot.id, waterAsset));
+                waterEffect.setDisplaySize(GameConfig.plotSize, GameConfig.plotSize);
+                waterEffect.setAlpha(0.6);
+                
+                // Fade out water effect
+                this.scene.tweens.add({
+                    targets: waterEffect,
+                    alpha: 0,
+                    duration: 3000,
+                    onComplete: () => waterEffect.destroy()
+                });
+                
+                container.add(waterEffect);
+            }
         }
     }
     
