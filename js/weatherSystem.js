@@ -1,197 +1,354 @@
-// Weather System
+// Weather System - Real-world weather integration with fallback simulation
 class WeatherSystem {
     constructor() {
-        this.currentWeather = this.generateWeather();
-        this.lastWeatherChange = 0;
-        this.weatherChangeDuration = 15; // Change weather every 15 ticks
-        this.seasons = ['SPRING', 'SUMMER', 'FALL', 'WINTER'];
-        this.currentSeason = 0;
-        this.seasonTick = 0;
-        this.seasonDuration = 100; // 100 ticks per season
+        this.currentWeather = null;
+        this.lastApiUpdate = 0;
+        this.apiUpdateInterval = GameConfig.weather.updateInterval;
+        this.useRealWeather = GameConfig.weather.useRealWeather;
+        this.currentCity = GameConfig.weather.defaultCity;
+        
+        this.initializeWeather();
     }
     
-    generateWeather() {
-        const weatherTypes = ['SUNNY', 'RAINY', 'CLOUDY', 'STORMY'];
-        const seasonWeatherProbabilities = {
-            SPRING: { SUNNY: 0.4, RAINY: 0.35, CLOUDY: 0.2, STORMY: 0.05 },
-            SUMMER: { SUNNY: 0.6, RAINY: 0.1, CLOUDY: 0.25, STORMY: 0.05 },
-            FALL: { SUNNY: 0.3, RAINY: 0.3, CLOUDY: 0.3, STORMY: 0.1 },
-            WINTER: { SUNNY: 0.2, RAINY: 0.2, CLOUDY: 0.5, STORMY: 0.1 }
-        };
-        
-        const season = this.seasons[this.currentSeason];
-        const probabilities = seasonWeatherProbabilities[season];
-        
-        const rand = Math.random();
-        let cumulative = 0;
-        
-        for (const weatherType of weatherTypes) {
-            cumulative += probabilities[weatherType];
-            if (rand <= cumulative) {
-                return this.createWeatherObject(weatherType, season);
-            }
+    async initializeWeather() {
+        if (this.useRealWeather) {
+            await this.fetchRealWeather();
+        } else {
+            this.generateSimulatedWeather();
         }
         
-        return this.createWeatherObject('SUNNY', season);
+        this.startWeatherUpdates();
     }
     
-    createWeatherObject(type, season) {
-        const baseTemperatures = {
-            SPRING: { min: 15, max: 25 },
-            SUMMER: { min: 20, max: 35 },
-            FALL: { min: 10, max: 20 },
-            WINTER: { min: -5, max: 10 }
-        };
+    async fetchRealWeather() {
+        try {
+            const response = await fetch(
+                `${GameConfig.weather.apiUrl}?q=${this.currentCity}&appid=${GameConfig.weather.apiKey}&units=metric`
+            );
+            
+            if (!response.ok) {
+                throw new Error(`Weather API error: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            this.currentWeather = this.parseApiWeather(data);
+            this.lastApiUpdate = Date.now();
+            
+            console.log('Real weather fetched:', this.currentWeather);
+            
+        } catch (error) {
+            console.warn('Failed to fetch real weather, using simulation:', error);
+            this.useRealWeather = false;
+            this.generateSimulatedWeather();
+        }
+    }
+    
+    parseApiWeather(apiData) {
+        const condition = apiData.weather[0].main.toLowerCase();
+        const temperature = apiData.main.temp;
+        const humidity = apiData.main.humidity;
+        const windSpeed = apiData.wind?.speed || 0;
         
-        const weatherModifiers = {
-            SUNNY: { tempModifier: 5, humidityBase: 45 },
-            RAINY: { tempModifier: -3, humidityBase: 85 },
-            CLOUDY: { tempModifier: 0, humidityBase: 65 },
-            STORMY: { tempModifier: -5, humidityBase: 90 }
-        };
+        // Map API conditions to game weather types
+        let weatherType = 'SUNNY';
         
-        const seasonTemp = baseTemperatures[season];
-        const modifier = weatherModifiers[type];
+        if (condition.includes('rain') || condition.includes('drizzle')) {
+            weatherType = 'RAINY';
+        } else if (condition.includes('snow')) {
+            weatherType = 'SNOW';
+        } else if (condition.includes('cloud')) {
+            weatherType = 'CLOUDY';
+        } else if (temperature > 35 || humidity < 20) {
+            weatherType = 'DROUGHT';
+        }
         
-        const temperature = Math.round(
-            (seasonTemp.min + seasonTemp.max) / 2 + 
-            modifier.tempModifier + 
-            (Math.random() - 0.5) * 10
-        );
-        
-        const humidity = Math.round(
-            modifier.humidityBase + (Math.random() - 0.5) * 20
-        );
+        const weatherConfig = GameConfig.weatherTypes[weatherType];
         
         return {
-            type: type,
-            season: season,
-            temperature: Math.max(-10, Math.min(40, temperature)),
-            humidity: Math.max(20, Math.min(100, humidity)),
-            effects: GameConfig.weatherEffects[type],
-            emoji: this.getWeatherEmoji(type),
-            description: this.getWeatherDescription(type, season)
+            type: weatherType,
+            name: weatherConfig.name,
+            emoji: weatherConfig.emoji,
+            description: weatherConfig.description,
+            temperature: Math.round(temperature),
+            humidity: humidity,
+            windSpeed: Math.round(windSpeed),
+            effects: {
+                growthMultiplier: weatherConfig.growthMultiplier,
+                waterEvaporation: weatherConfig.waterEvaporation,
+                autoWater: weatherConfig.autoWater || false
+            },
+            source: 'api',
+            city: this.currentCity,
+            timestamp: Date.now()
         };
     }
     
-    getWeatherEmoji(type) {
-        const emojis = {
-            SUNNY: '☀️',
-            RAINY: '🌧️',
-            CLOUDY: '☁️',
-            STORMY: '⛈️'
+    generateSimulatedWeather() {
+        const weatherTypes = Object.keys(GameConfig.weatherTypes);
+        const selectedType = weatherTypes[Math.floor(Math.random() * weatherTypes.length)];
+        const weatherConfig = GameConfig.weatherTypes[selectedType];
+        
+        // Generate realistic temperature and humidity
+        const baseTemp = this.getSeasonalBaseTemperature();
+        const tempVariation = (Math.random() - 0.5) * 20;
+        const temperature = Math.round(baseTemp + tempVariation);
+        
+        const baseHumidity = this.getWeatherHumidity(selectedType);
+        const humidityVariation = (Math.random() - 0.5) * 30;
+        const humidity = Math.max(10, Math.min(100, Math.round(baseHumidity + humidityVariation)));
+        
+        this.currentWeather = {
+            type: selectedType,
+            name: weatherConfig.name,
+            emoji: weatherConfig.emoji,
+            description: weatherConfig.description,
+            temperature: temperature,
+            humidity: humidity,
+            windSpeed: Math.round(Math.random() * 20),
+            effects: {
+                growthMultiplier: weatherConfig.growthMultiplier,
+                waterEvaporation: weatherConfig.waterEvaporation,
+                autoWater: weatherConfig.autoWater || false
+            },
+            source: 'simulated',
+            timestamp: Date.now()
         };
-        return emojis[type] || '☀️';
     }
     
-    getWeatherDescription(type, season) {
-        const descriptions = {
-            SUNNY: ['Clear skies', 'Bright sunshine', 'Perfect weather'],
-            RAINY: ['Light rain', 'Steady rainfall', 'Gentle showers'],
-            CLOUDY: ['Overcast skies', 'Partly cloudy', 'Gray clouds'],
-            STORMY: ['Thunder storms', 'Heavy rain', 'Wild weather']
+    getSeasonalBaseTemperature() {
+        const seasons = {
+            spring: 18,
+            summer: 28,
+            autumn: 15,
+            winter: 5
         };
         
-        const typeDescriptions = descriptions[type] || descriptions.SUNNY;
-        return typeDescriptions[Math.floor(Math.random() * typeDescriptions.length)];
+        // Simple seasonal calculation based on date
+        const month = new Date().getMonth();
+        if (month >= 2 && month <= 4) return seasons.spring;
+        if (month >= 5 && month <= 7) return seasons.summer;
+        if (month >= 8 && month <= 10) return seasons.autumn;
+        return seasons.winter;
     }
     
-    update(gameTick) {
-        // Update season
-        this.seasonTick++;
-        if (this.seasonTick >= this.seasonDuration) {
-            this.seasonTick = 0;
-            this.currentSeason = (this.currentSeason + 1) % this.seasons.length;
+    getWeatherHumidity(weatherType) {
+        const humidityMap = {
+            SUNNY: 45,
+            RAINY: 85,
+            CLOUDY: 65,
+            SNOW: 75,
+            DROUGHT: 25
+        };
+        return humidityMap[weatherType] || 50;
+    }
+    
+    startWeatherUpdates() {
+        // Update weather periodically
+        setInterval(() => {
+            this.updateWeather();
+        }, this.apiUpdateInterval);
+        
+        // Also update every few game ticks for simulation
+        if (!this.useRealWeather) {
+            setInterval(() => {
+                if (Math.random() < 0.1) { // 10% chance to change weather
+                    this.generateSimulatedWeather();
+                    this.notifyWeatherChange();
+                }
+            }, GameConfig.gameTickSpeed * 15); // Every 15 game ticks
+        }
+    }
+    
+    async updateWeather() {
+        const now = Date.now();
+        
+        if (this.useRealWeather && (now - this.lastApiUpdate) >= this.apiUpdateInterval) {
+            await this.fetchRealWeather();
+            this.notifyWeatherChange();
+        }
+    }
+    
+    notifyWeatherChange() {
+        if (window.uiManager) {
+            window.uiManager.updateWeatherDisplay();
+            window.uiManager.showNotification(
+                `Weather changed to ${this.currentWeather.emoji} ${this.currentWeather.name}`,
+                'info'
+            );
         }
         
-        // Update weather
-        if (gameTick - this.lastWeatherChange >= this.weatherChangeDuration) {
-            this.currentWeather = this.generateWeather();
-            this.lastWeatherChange = gameTick;
-            
-            // Notify UI of weather change
-            if (window.uiManager) {
-                window.uiManager.updateWeatherDisplay();
+        // Apply weather effects to all plants
+        if (window.gameState) {
+            this.applyWeatherEffects();
+        }
+    }
+    
+    applyWeatherEffects() {
+        window.gameState.farm.plots.forEach(plot => {
+            if (plot.plant && plot.isUnlocked) {
+                // Auto-water from rain
+                if (this.currentWeather.effects.autoWater) {
+                    plot.waterLevel = Math.min(1.0, plot.waterLevel + 0.3);
+                }
+                
+                // Environmental stress from extreme weather
+                if (this.currentWeather.type === 'DROUGHT' && plot.waterLevel < 0.2) {
+                    plot.pollution = Math.min(1.0, plot.pollution + 0.1);
+                }
+                
+                // Snow damage without greenhouse
+                if (this.currentWeather.type === 'SNOW' && !plot.hasGreenhouse) {
+                    if (plot.plant.stage > GameConfig.growthStages.SEED) {
+                        plot.plant.health -= 0.05;
+                    }
+                }
             }
-        }
+        });
     }
     
     getCurrentWeather() {
         return this.currentWeather;
     }
     
-    getCurrentSeason() {
-        return this.seasons[this.currentSeason];
+    getWeatherEffects() {
+        return this.currentWeather?.effects || {
+            growthMultiplier: 1.0,
+            waterEvaporation: 0.1,
+            autoWater: false
+        };
     }
     
-    getSeasonProgress() {
-        return this.seasonTick / this.seasonDuration;
+    // Method to change city for real weather
+    async changeCity(cityName) {
+        if (!this.useRealWeather) return false;
+        
+        this.currentCity = cityName;
+        await this.fetchRealWeather();
+        this.notifyWeatherChange();
+        return true;
     }
     
-    // Get forecast for next few weather changes
+    // Toggle between real and simulated weather
+    toggleWeatherSource() {
+        this.useRealWeather = !this.useRealWeather;
+        
+        if (this.useRealWeather) {
+            this.fetchRealWeather();
+        } else {
+            this.generateSimulatedWeather();
+        }
+        
+        this.notifyWeatherChange();
+        return this.useRealWeather;
+    }
+    
+    // Get weather forecast (simulated for now)
     getForecast(days = 3) {
         const forecast = [];
-        let tempSeason = this.currentSeason;
-        let tempSeasonTick = this.seasonTick;
         
-        for (let i = 0; i < days; i++) {
-            // Simulate season progression
-            tempSeasonTick += this.weatherChangeDuration;
-            if (tempSeasonTick >= this.seasonDuration) {
-                tempSeasonTick = 0;
-                tempSeason = (tempSeason + 1) % this.seasons.length;
-            }
+        for (let i = 1; i <= days; i++) {
+            // Simple forecast simulation
+            const weatherTypes = Object.keys(GameConfig.weatherTypes);
+            const randomType = weatherTypes[Math.floor(Math.random() * weatherTypes.length)];
+            const config = GameConfig.weatherTypes[randomType];
             
-            // Generate weather for that season
-            const originalSeason = this.currentSeason;
-            const originalSeasonTick = this.seasonTick;
-            
-            this.currentSeason = tempSeason;
-            this.seasonTick = tempSeasonTick;
-            
-            const weather = this.generateWeather();
-            forecast.push(weather);
-            
-            // Restore original values
-            this.currentSeason = originalSeason;
-            this.seasonTick = originalSeasonTick;
+            forecast.push({
+                day: i,
+                type: randomType,
+                name: config.name,
+                emoji: config.emoji,
+                description: config.description,
+                temperature: this.getSeasonalBaseTemperature() + (Math.random() - 0.5) * 15,
+                probability: 60 + Math.random() * 30 // 60-90% confidence
+            });
         }
         
         return forecast;
     }
     
     // Special weather events
-    triggerSpecialWeather(type, duration = 5) {
-        const specialWeather = this.createWeatherObject(type, this.getCurrentSeason());
-        this.currentWeather = specialWeather;
-        this.lastWeatherChange = window.gameState?.gameTick || 0;
-        this.weatherChangeDuration = duration;
+    triggerSpecialWeather(weatherType, duration = 5) {
+        const config = GameConfig.weatherTypes[weatherType];
+        if (!config) return;
         
-        // Reset to normal duration after special event
+        this.currentWeather = {
+            type: weatherType,
+            name: config.name,
+            emoji: config.emoji,
+            description: `Special ${config.description}`,
+            temperature: this.currentWeather?.temperature || 20,
+            humidity: this.currentWeather?.humidity || 50,
+            windSpeed: this.currentWeather?.windSpeed || 5,
+            effects: {
+                growthMultiplier: config.growthMultiplier * 1.5, // Boost special weather
+                waterEvaporation: config.waterEvaporation,
+                autoWater: config.autoWater || false
+            },
+            source: 'special',
+            duration: duration,
+            timestamp: Date.now()
+        };
+        
+        this.notifyWeatherChange();
+        
+        // Revert after duration
         setTimeout(() => {
-            this.weatherChangeDuration = 15;
+            if (this.useRealWeather) {
+                this.fetchRealWeather();
+            } else {
+                this.generateSimulatedWeather();
+            }
+            this.notifyWeatherChange();
         }, duration * GameConfig.gameTickSpeed);
     }
     
-    // Weather effects on farming
-    getGrowthBonus() {
-        return this.currentWeather.effects.growthMultiplier;
-    }
-    
-    getWaterEvaporation() {
-        return this.currentWeather.effects.waterEvaporation;
-    }
-    
-    // Seasonal bonuses
-    getSeasonalEffects() {
-        const seasonEffects = {
-            SPRING: { seedGrowthBonus: 1.1, experienceBonus: 1.05 },
-            SUMMER: { harvestBonus: 1.1, waterEvaporationPenalty: 1.2 },
-            FALL: { sellPriceBonus: 1.15, weatherChangeFrequency: 0.8 },
-            WINTER: { growthPenalty: 0.9, resourceConsumption: 0.8 }
-        };
+    // Environmental impact calculation
+    getEnvironmentalImpact() {
+        const weather = this.currentWeather;
+        if (!weather) return { air: 50, water: 50, soil: 50 };
         
-        return seasonEffects[this.getCurrentSeason()] || {};
+        let airQuality = 70;
+        let waterQuality = 70;
+        let soilQuality = 70;
+        
+        // Weather affects environmental quality
+        switch (weather.type) {
+            case 'RAINY':
+                waterQuality += 20;
+                soilQuality += 10;
+                airQuality += 15;
+                break;
+            case 'DROUGHT':
+                waterQuality -= 25;
+                soilQuality -= 15;
+                airQuality -= 10;
+                break;
+            case 'SNOW':
+                waterQuality += 10;
+                airQuality += 20;
+                break;
+            case 'SUNNY':
+                soilQuality += 5;
+                break;
+        }
+        
+        return {
+            air: Math.max(0, Math.min(100, airQuality)),
+            water: Math.max(0, Math.min(100, waterQuality)),
+            soil: Math.max(0, Math.min(100, soilQuality))
+        };
+    }
+    
+    // Weather statistics for eco scoring
+    getWeatherStats() {
+        return {
+            currentCondition: this.currentWeather?.type || 'UNKNOWN',
+            temperature: this.currentWeather?.temperature || 20,
+            humidity: this.currentWeather?.humidity || 50,
+            source: this.currentWeather?.source || 'none',
+            lastUpdate: this.currentWeather?.timestamp || 0,
+            city: this.currentCity
+        };
     }
 }
 
