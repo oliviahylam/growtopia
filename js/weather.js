@@ -17,6 +17,7 @@ class WeatherSystem {
 
     setApiKey(key) {
         this.apiKey = key;
+        console.log('[WeatherSystem] API key set:', key);
     }
 
     setCity(city) {
@@ -25,22 +26,25 @@ class WeatherSystem {
 
     async fetchWeatherData() {
         if (!this.apiKey) {
-            console.warn("Weather API key not set, using default weather");
+            console.warn('[WeatherSystem] Weather API key not set, using default weather');
             return this.getDefaultWeather();
         }
 
         try {
             const url = `https://api.openweathermap.org/data/2.5/weather?q=${this.city}&appid=${this.apiKey}&units=metric`;
+            console.log('[WeatherSystem] Fetching weather from:', url);
             const response = await fetch(url);
+            console.log('[WeatherSystem] API response status:', response.status);
             
             if (!response.ok) {
-                throw new Error(`Weather API error: ${response.status}`);
+                throw new Error(`[WeatherSystem] Weather API error: ${response.status}`);
             }
             
             const data = await response.json();
+            console.log('[WeatherSystem] API response data:', data);
             return this.processWeatherData(data);
         } catch (error) {
-            console.error("Failed to fetch weather:", error);
+            console.error('[WeatherSystem] Failed to fetch weather:', error);
             return this.getDefaultWeather();
         }
     }

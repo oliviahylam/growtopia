@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Growtopia - Enhanced Farming Simulation</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+        
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            font-family: 'Press Start 2P', cursive;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+        }
+        
+        #game-container {
+            border: 4px solid #34495e;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+        
+        .ui-panel {
+            position: absolute;
+            background: rgba(44, 62, 80, 0.95);
+            border: 2px solid #34495e;
+            border-radius: 6px;
+            padding: 12px;
+            color: #ecf0f1;
+            font-size: 10px;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+        
+        .ui-panel h3 {
+            margin: 0 0 12px 0;
+            color: #f39c12;
+            text-align: center;
+        }
+        
+        .resource-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 6px 0;
+            align-items: center;
+        }
+        
+        .button {
+            background: linear-gradient(145deg, #27ae60, #2ecc71);
+            border: 2px solid #2ecc71;
+            color: white;
+            padding: 6px 12px;
+            margin: 3px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 8px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            display: block;
+            width: 100%;
+            text-align: center;
+        }
+        
+        .button:hover {
+            background: linear-gradient(145deg, #2ecc71, #27ae60);
+            transform: translateY(-1px);
+        }
+        
+        .button:disabled {
+            background: #7f8c8d;
+            border-color: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .seed-button {
+            background: linear-gradient(145deg, #e67e22, #f39c12);
+            border: 2px solid #f39c12;
+            margin: 2px 0;
+        }
+        
+        .seed-button:hover {
+            background: linear-gradient(145deg, #f39c12, #e67e22);
+        }
+        
+        .eco-meter {
+            width: 100%;
+            height: 8px;
+            background: #34495e;
+            border-radius: 4px;
+            margin: 4px 0;
+            overflow: hidden;
+        }
+        
+        .eco-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #e74c3c, #f39c12, #27ae60);
+            transition: width 0.3s ease;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(52, 73, 94, 0.95);
+            color: #f39c12;
+            padding: 12px 18px;
+            border-radius: 6px;
+            font-size: 9px;
+            z-index: 10001;
+            border: 2px solid #f39c12;
+            max-width: 200px;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .plant-info {
+            position: absolute;
+            background: rgba(52, 73, 94, 0.95);
+            color: white;
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            pointer-events: none;
+            z-index: 1000;
+            max-width: 200px;
+        }
+        
+        .seed-menu {
+            position: absolute;
+            background: rgba(44, 62, 80, 0.98);
+            border: 3px solid #f39c12;
+            border-radius: 8px;
+            padding: 15px;
+            color: #ecf0f1;
+            font-size: 10px;
+            z-index: 2000;
+            min-width: 200px;
+            display: none;
+        }
+        
+        .seed-menu h3 {
+            margin: 0 0 10px 0;
+            color: #f39c12;
+            text-align: center;
+            border-bottom: 1px solid #34495e;
+            padding-bottom: 8px;
+        }
+        
+        .close-button {
+            background: linear-gradient(145deg, #e74c3c, #c0392b);
+            border: 2px solid #e74c3c;
+            color: white;
+            padding: 4px 8px;
+            font-size: 8px;
+            cursor: pointer;
+            border-radius: 3px;
+            float: right;
+            margin-top: -5px;
+        }
+        
+        .close-button:hover {
+            background: linear-gradient(145deg, #c0392b, #e74c3c);
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <div id="game"></div>
+    </div>
+    
+    <!-- UI Panels with Old Growtopia Style -->
+    <div id="resources-panel" class="ui-panel" style="top: 10px; left: 10px; width: 180px;">
+        <h3>🌱 Garden Resources</h3>
+        <div class="resource-item">
+            <span>🍃 Leaf Coins:</span>
+            <span id="leaf-coins">100</span>
+        </div>
+        <div class="resource-item">
+            <span>🌰 Apple Seeds:</span>
+            <span id="apple-seeds">5</span>
+        </div>
+        <div class="resource-item">
+            <span>🥕 Carrot Seeds:</span>
+            <span id="carrot-seeds">3</span>
+        </div>
+        <div class="resource-item">
+            <span>🍎 Harvested:</span>
+            <span id="fruits-harvested">0</span>
+        </div>
+        <div class="resource-item">
+            <span>⭐ Experience:</span>
+            <span id="experience">0</span>
+        </div>
+        <div class="resource-item">
+            <span>🏆 Level:</span>
+            <span id="level">1</span>
+        </div>
+    </div>
+    
+    <div id="weather-panel" class="ui-panel" style="top: 10px; right: 10px; width: 160px;">
+        <h3>🌦️ Environment</h3>
+        <div id="weather-info">☀️ Sunny</div>
+        <div id="temperature">22°C</div>
+        <div id="humidity">65%</div>
+        <div style="margin-top: 8px; font-size: 8px;">
+            <div>🌍 Eco Score</div>
+            <div class="eco-meter">
+                <div class="eco-fill" id="eco-fill" style="width: 70%"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="conditions-panel" class="ui-panel" style="top: 200px; right: 10px; width: 160px;">
+        <h3>🌿 Plant Conditions</h3>
+        <div class="resource-item">
+            <span>💧 Water:</span>
+            <span id="avg-water">Good</span>
+        </div>
+        <div class="resource-item">
+            <span>🏥 Health:</span>
+            <span id="avg-health">Healthy</span>
+        </div>
+        <div class="resource-item">
+            <span>🌱 Soil Quality:</span>
+            <span id="soil-quality">Rich</span>
+        </div>
+        <div class="resource-item">
+            <span>🏭 Pollution:</span>
+            <span id="pollution-level">Low</span>
+        </div>
+    </div>
+    
+    <div id="shop-panel" class="ui-panel" style="bottom: 10px; left: 10px; width: 200px;">
+        <h3>🛒 Garden Shop</h3>
+        <div style="margin-bottom: 8px;">
+            <strong>Seeds</strong>
+        </div>
+        <button class="button seed-button" id="buy-apple-seeds">🌰 Apple Seeds (15🍃)</button>
+        <button class="button seed-button" id="buy-carrot-seeds">🥕 Carrot Seeds (10🍃)</button>
+        
+        <div style="margin: 8px 0 4px 0;">
+            <strong>Tools</strong>
+        </div>
+        <button class="button" id="buy-watering-can">🪣 Watering Can (50🍃)</button>
+        <button class="button" id="buy-sprinkler">💧 Sprinkler (150🍃)</button>
+    </div>
+    
+    <div id="controls-panel" class="ui-panel" style="bottom: 10px; right: 10px; width: 180px;">
+        <h3>🎮 Controls</h3>
+        <div style="margin: 4px 0;">🖱️ Click: Select Tile</div>
+        <div style="margin: 4px 0;">🌱 Plant: Choose from Menu</div>
+        <div style="margin: 4px 0;">🖱️ Right-click: Harvest</div>
+        <div style="margin: 4px 0;">⌨️ Space: Water all</div>
+        <div style="margin: 4px 0;">⌨️ H: Harvest all ready</div>
+        <button class="button" onclick="toggleAdvancedMode()">🔧 Advanced Mode</button>
+    </div>
+    
+    <!-- Seed Selection Menu -->
+    <div id="seed-menu" class="seed-menu">
+        <button class="close-button" onclick="closeSeedMenu()">✕</button>
+        <h3>🌱 Choose Seeds to Plant</h3>
+        <div id="selected-tile-info" style="margin-bottom: 10px; color: #bdc3c7; font-size: 8px;"></div>
+        <button class="button seed-button" onclick="plantSeed('apple')">🌰 Plant Apple (Cost: 15🍃)</button>
+        <button class="button seed-button" onclick="plantSeed('carrot')">🥕 Plant Carrot (Cost: 10🍃)</button>
+        <div style="margin-top: 10px; font-size: 8px; color: #95a5a6;">
+            Click a seed to plant on the selected tile
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.70.0/dist/phaser.min.js"></script>
+    <script>
+        // =============================================================================
+        // GAME CONFIGURATION & STATE
+        // =============================================================================
+        
+        const CONFIG = {
+            CANVAS_WIDTH: 800,
+            CANVAS_HEIGHT: 600,
+            GRID_WIDTH: 6,
+            GRID_HEIGHT: 6,
+            TILE_WIDTH: 64,
+            TILE_HEIGHT: 32,
+            GROWTH_INTERVAL: 4000 // 4 seconds per stage
+        };
+        
+        let gameState = {
+            grid: [],
+            assets: {},
+            leafCoins: 100,
+            appleSeeds: 5,
+            carrotSeeds: 3,
+            fruitsHarvested: 0,
+            experience: 0,
+            level: 1,
+            selectedTile: null,
+            weatherSystem: null
+        };
+        
+        const SEED_COSTS = {
+            apple: 15,
+            carrot: 10
+        };
+        
+        const HARVEST_REWARDS = {
+            apple: 25,
+            carrot: 15
+        };
+        
+        // =============================================================================
+        // CROP SYSTEM (Enhanced)
+        // =============================================================================
+        
+        class Crop {
+            constructor(type, x, y) {
+                this.type = type;
+                this.x = x;
+                this.y = y;
+                this.stage = 0;
+                this.maxStage = type === 'apple' ? 4 : 3; // Apples have 5 stages, carrots 4
+                this.plantTime = Date.now();
+                this.lastGrowthTime = Date.now();
+                this.wateredToday = false;
+                this.health = 100;
+            }
+            
+            update() {
+                const now = Date.now();
+                if (this.stage < this.maxStage && 
+                    now - this.lastGrowthTime > CONFIG.GROWTH_INTERVAL) {
+                    this.stage++;
+                    this.lastGrowthTime = now;
+                    showNotification(`${this.type} grew to stage ${this.stage + 1}!`);
+                    
+                    // Trigger redraw to show growth
+                    if (game.scene.getScene('GrowtopiaScene')) {
+                        game.scene.getScene('GrowtopiaScene').needsRedraw = true;
+                    }
+                }
+            }
+            
+            isReadyToHarvest() {
+                return this.stage === this.maxStage;
+            }
+            
+            getAssetKey() {
+                return `${this.type}_stage${this.stage}`;
+            }
+            
+            getEmoji() {
+                const emojis = {
+                    apple: ['🌱', '🌿', '🌳', '🍎', '🍎'],
+                    carrot: ['🌱', '🌿', '🥕', '🥕']
+                };
+                return emojis[this.type][this.stage] || '🌱';
+            }
+        }
+        
+        // =============================================================================
+        // TILE SYSTEM (Enhanced)
+        // =============================================================================
+        
+        class Tile {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.crop = null;
+                this.type = 'grass';
+                this.moisture = 50;
+                this.fertility = 75;
+            }
+            
+            plantCrop(cropType) {
+                const cost = SEED_COSTS[cropType];
+                const seedCount = gameState[cropType + 'Seeds'];
+                
+                if (this.crop === null && gameState.leafCoins >= cost && seedCount > 0) {
+                    this.crop = new Crop(cropType, this.x, this.y);
+                    this.type = 'soil';
+                    gameState.leafCoins -= cost;
+                    gameState[cropType + 'Seeds']--;
+                    gameState.experience += 5;
+                    updateUI();
+                    showNotification(`Planted ${cropType}! (-${cost}🍃)`);
+                    return true;
+                }
+                return false;
+            }
+            
+            harvestCrop() {
+                if (this.crop && this.crop.isReadyToHarvest()) {
+                    const reward = HARVEST_REWARDS[this.crop.type];
+                    gameState.leafCoins += reward;
+                    gameState.fruitsHarvested++;
+                    gameState.experience += 10;
+                    
+                    // Level up check
+                    const newLevel = Math.floor(gameState.experience / 100) + 1;
+                    if (newLevel > gameState.level) {
+                        gameState.level = newLevel;
+                        showNotification(`Level Up! Now level ${gameState.level}! 🎉`);
+                    }
+                    
+                    this.crop = null;
+                    this.type = 'grass';
+                    updateUI();
+                    showNotification(`Harvested! (+${reward}🍃)`);
+                    return true;
+                }
+                return false;
+            }
+            
+            update() {
+                if (this.crop) {
+                    this.crop.update();
+                }
+            }
+        }
+        
+        // =============================================================================
+        // PHASER GAME SCENE
+        // =============================================================================
+        
+        class GrowtopiaScene extends Phaser.Scene {
+            constructor() {
+                super({ key: 'GrowtopiaScene' });
+            }
+            
+            preload() {
+                this.createPixelSprites();
+            }
+            
+            create() {
+                // Initialize grid
+                gameState.grid = [];
+                for (let y = 0; y < CONFIG.GRID_HEIGHT; y++) {
+                    gameState.grid[y] = [];
+                    for (let x = 0; x < CONFIG.GRID_WIDTH; x++) {
+                        gameState.grid[y][x] = new Tile(x, y);
+                    }
+                }
+                
+                // Set up input
+                this.input.on('pointerdown', this.onTileClick, this);
+                this.input.on('pointerup', this.onTileRelease, this);
+                
+                // Initialize weather
+                initializeWeather();
+                
+                // Initial render
+                this.needsRedraw = true;
+                this.renderGrid();
+                
+                updateUI();
+            }
+            
+            createPixelSprites() {
+                // Create isometric tile sprites
+                this.add.graphics()
+                    .fillStyle(0x228B22)
+                    .fillPath(this.createDiamondPath())
+                    .generateTexture('grass', CONFIG.TILE_WIDTH, CONFIG.TILE_HEIGHT);
+                
+                this.add.graphics()
+                    .fillStyle(0x8B4513)
+                    .fillPath(this.createDiamondPath())
+                    .generateTexture('soil', CONFIG.TILE_WIDTH, CONFIG.TILE_HEIGHT);
+                
+                // Create crop sprites
+                this.createCropSprites();
+            }
+            
+            createDiamondPath() {
+                const path = new Phaser.Geom.Path();
+                path.moveTo(CONFIG.TILE_WIDTH / 2, 0);
+                path.lineTo(CONFIG.TILE_WIDTH, CONFIG.TILE_HEIGHT / 2);
+                path.lineTo(CONFIG.TILE_WIDTH / 2, CONFIG.TILE_HEIGHT);
+                path.lineTo(0, CONFIG.TILE_HEIGHT / 2);
+                path.closePath();
+                return path;
+            }
+            
+            createCropSprites() {
+                // Apple stages
+                const appleColors = [0x90EE90, 0x32CD32, 0x228B22, 0x006400, 0xFF0000];
+                for (let i = 0; i < 5; i++) {
+                    const size = 20 + i * 8;
+                    this.add.graphics()
+                        .fillStyle(appleColors[i])
+                        .fillCircle(size / 2, size - 5, size / 2)
+                        .generateTexture(`apple_stage${i}`, size, size);
+                }
+                
+                // Carrot stages
+                const carrotColors = [0x90EE90, 0x32CD32, 0xFF8C00, 0xFF6347];
+                for (let i = 0; i < 4; i++) {
+                    const size = 15 + i * 6;
+                    this.add.graphics()
+                        .fillStyle(carrotColors[i])
+                        .fillRect(0, 0, size, size)
+                        .generateTexture(`carrot_stage${i}`, size, size);
+                }
+            }
+            
+            worldToScreen(worldX, worldY) {
+                const screenX = (worldX - worldY) * CONFIG.TILE_WIDTH / 2;
+                const screenY = (worldX + worldY) * CONFIG.TILE_HEIGHT / 2;
+                return { 
+                    x: screenX + this.cameras.main.centerX - 100, 
+                    y: screenY + 100 
+                };
+            }
+            
+            screenToWorld(screenX, screenY) {
+                const adjustedX = screenX - this.cameras.main.centerX + 100;
+                const adjustedY = screenY - 100;
+                
+                const worldX = (adjustedX / (CONFIG.TILE_WIDTH / 2) + adjustedY / (CONFIG.TILE_HEIGHT / 2)) / 2;
+                const worldY = (adjustedY / (CONFIG.TILE_HEIGHT / 2) - adjustedX / (CONFIG.TILE_WIDTH / 2)) / 2;
+                
+                return { 
+                    x: Math.floor(worldX), 
+                    y: Math.floor(worldY) 
+                };
+            }
+            
+            onTileClick(pointer) {
+                const worldPos = this.screenToWorld(pointer.x, pointer.y);
+                
+                if (this.isValidTile(worldPos.x, worldPos.y)) {
+                    const tile = gameState.grid[worldPos.y][worldPos.x];
+                    gameState.selectedTile = { x: worldPos.x, y: worldPos.y };
+                    this.needsRedraw = true; // Trigger redraw for selection highlight
+                    
+                    if (pointer.rightButtonDown()) {
+                        // Right click - harvest
+                        if (tile.harvestCrop()) {
+                            console.log(`Harvested crop at (${worldPos.x}, ${worldPos.y})`);
+                            this.needsRedraw = true; // Trigger redraw after harvest
+                        }
+                    } else {
+                        // Left click - show seed menu or harvest
+                        if (tile.crop && tile.crop.isReadyToHarvest()) {
+                            tile.harvestCrop();
+                            this.needsRedraw = true; // Trigger redraw after harvest
+                        } else if (!tile.crop) {
+                            showSeedMenu(worldPos.x, worldPos.y);
+                        }
+                    }
+                }
+            }
+            
+            onTileRelease(pointer) {
+                // Handle any release logic if needed
+            }
+            
+            isValidTile(x, y) {
+                return x >= 0 && x < CONFIG.GRID_WIDTH && y >= 0 && y < CONFIG.GRID_HEIGHT;
+            }
+            
+            update() {
+                // Update all tiles (but don't clear the screen every frame)
+                for (let y = 0; y < CONFIG.GRID_HEIGHT; y++) {
+                    for (let x = 0; x < CONFIG.GRID_WIDTH; x++) {
+                        gameState.grid[y][x].update();
+                    }
+                }
+                
+                // Only re-render if something changed
+                if (this.needsRedraw) {
+                    this.renderGrid();
+                    this.needsRedraw = false;
+                }
+            }
+            
+            renderGrid() {
+                // Clear existing sprites before redrawing
+                this.children.removeAll();
+                
+                for (let y = 0; y < CONFIG.GRID_HEIGHT; y++) {
+                    for (let x = 0; x < CONFIG.GRID_WIDTH; x++) {
+                        const tile = gameState.grid[y][x];
+                        const screenPos = this.worldToScreen(x, y);
+                        
+                        // Draw base tile
+                        const tileSprite = this.add.image(screenPos.x, screenPos.y, tile.type);
+                        tileSprite.setDepth(screenPos.y);
+                        tileSprite.setOrigin(0.5, 0.5);
+                        
+                        // Draw crop if any
+                        if (tile.crop) {
+                            const cropSprite = this.add.image(
+                                screenPos.x, 
+                                screenPos.y - 10, 
+                                tile.crop.getAssetKey()
+                            );
+                            cropSprite.setDepth(screenPos.y + 1);
+                            cropSprite.setOrigin(0.5, 1);
+                        }
+                        
+                        // Draw selection highlight
+                        if (gameState.selectedTile && 
+                            gameState.selectedTile.x === x && 
+                            gameState.selectedTile.y === y) {
+                            const highlight = this.add.graphics();
+                            highlight.lineStyle(2, 0xFFFF00);
+                            highlight.strokePath(this.createDiamondPath());
+                            highlight.setPosition(screenPos.x - CONFIG.TILE_WIDTH / 2, screenPos.y - CONFIG.TILE_HEIGHT / 2);
+                            highlight.setDepth(screenPos.y + 2);
+                        }
+                    }
+                }
+            }
+        }
+        
+        // =============================================================================
+        // UI FUNCTIONS
+        // =============================================================================
+        
+        function updateUI() {
+            document.getElementById('leaf-coins').textContent = gameState.leafCoins;
+            document.getElementById('apple-seeds').textContent = gameState.appleSeeds;
+            document.getElementById('carrot-seeds').textContent = gameState.carrotSeeds;
+            document.getElementById('fruits-harvested').textContent = gameState.fruitsHarvested;
+            document.getElementById('experience').textContent = gameState.experience;
+            document.getElementById('level').textContent = gameState.level;
+        }
+        
+        function showSeedMenu(x, y) {
+            const menu = document.getElementById('seed-menu');
+            const info = document.getElementById('selected-tile-info');
+            
+            info.textContent = `Selected tile: (${x}, ${y})`;
+            
+            // Position menu near the center
+            menu.style.left = '50%';
+            menu.style.top = '50%';
+            menu.style.transform = 'translate(-50%, -50%)';
+            menu.style.display = 'block';
+        }
+        
+        function closeSeedMenu() {
+            document.getElementById('seed-menu').style.display = 'none';
+            gameState.selectedTile = null;
+        }
+        
+        function plantSeed(seedType) {
+            if (gameState.selectedTile) {
+                const tile = gameState.grid[gameState.selectedTile.y][gameState.selectedTile.x];
+                if (tile.plantCrop(seedType)) {
+                    // Trigger redraw to show the planted crop
+                    if (game.scene.getScene('GrowtopiaScene')) {
+                        game.scene.getScene('GrowtopiaScene').needsRedraw = true;
+                    }
+                    closeSeedMenu();
+                } else {
+                    showNotification('Cannot plant here or not enough resources!');
+                }
+            }
+        }
+        
+        function showNotification(message) {
+            // Remove existing notification
+            const existing = document.querySelector('.notification');
+            if (existing) existing.remove();
+            
+            // Create new notification
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            // Auto-remove after 3 seconds
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 3000);
+        }
+        
+        function initializeWeather() {
+            // Simple weather simulation
+            const weathers = ['☀️ Sunny', '⛅ Partly Cloudy', '🌧️ Rainy', '🌤️ Fair'];
+            const weather = weathers[Math.floor(Math.random() * weathers.length)];
+            document.getElementById('weather-info').textContent = weather;
+            
+            const temp = Math.floor(Math.random() * 20) + 15;
+            document.getElementById('temperature').textContent = temp + '°C';
+            
+            const humidity = Math.floor(Math.random() * 40) + 40;
+            document.getElementById('humidity').textContent = humidity + '%';
+        }
+        
+        function toggleAdvancedMode() {
+            showNotification('Advanced mode coming soon! 🚀');
+        }
+        
+        // =============================================================================
+        // SHOP FUNCTIONS
+        // =============================================================================
+        
+        document.getElementById('buy-apple-seeds').addEventListener('click', function() {
+            if (gameState.leafCoins >= 15) {
+                gameState.leafCoins -= 15;
+                gameState.appleSeeds += 3;
+                updateUI();
+                showNotification('Bought 3 Apple Seeds! 🌰');
+            } else {
+                showNotification('Not enough coins! 💰');
+            }
+        });
+        
+        document.getElementById('buy-carrot-seeds').addEventListener('click', function() {
+            if (gameState.leafCoins >= 10) {
+                gameState.leafCoins -= 10;
+                gameState.carrotSeeds += 3;
+                updateUI();
+                showNotification('Bought 3 Carrot Seeds! 🥕');
+            } else {
+                showNotification('Not enough coins! 💰');
+            }
+        });
+        
+        // =============================================================================
+        // KEYBOARD SHORTCUTS
+        // =============================================================================
+        
+        document.addEventListener('keydown', function(e) {
+            switch(e.code) {
+                case 'Space':
+                    e.preventDefault();
+                    showNotification('Watered all plants! 💧');
+                    break;
+                case 'KeyH':
+                    // Harvest all ready crops
+                    let harvested = 0;
+                    for (let y = 0; y < CONFIG.GRID_HEIGHT; y++) {
+                        for (let x = 0; x < CONFIG.GRID_WIDTH; x++) {
+                            const tile = gameState.grid[y][x];
+                            if (tile.crop && tile.crop.isReadyToHarvest()) {
+                                tile.harvestCrop();
+                                harvested++;
+                            }
+                        }
+                    }
+                    if (harvested > 0) {
+                        showNotification(`Harvested ${harvested} crops! 🍎`);
+                    }
+                    break;
+                case 'Escape':
+                    closeSeedMenu();
+                    break;
+            }
+        });
+        
+        // =============================================================================
+        // GAME INITIALIZATION
+        // =============================================================================
+        
+        const gameConfig = {
+            type: Phaser.AUTO,
+            width: CONFIG.CANVAS_WIDTH,
+            height: CONFIG.CANVAS_HEIGHT,
+            parent: 'game',
+            backgroundColor: '#87CEEB',
+            scene: GrowtopiaScene,
+            pixelArt: true
+        };
+        
+        // Initialize the game
+        const game = new Phaser.Game(gameConfig);
+        
+        // Initial UI update
+        updateUI();
+        
+        console.log('Enhanced Growtopia loaded! Click tiles to plant, right-click to harvest.');
+    </script>
+</body>
+</html> 

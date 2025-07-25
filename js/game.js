@@ -22,6 +22,7 @@ class GrowtopiaGame extends Phaser.Scene {
     create() {
         // Initialize systems
         this.weatherSystem = new WeatherSystem();
+        this.weatherSystem.setApiKey('82b76cced925fdddfbe8866df6f66045');
         this.plantManager = new PlantManager(this.weatherSystem);
         
         // Load player stats

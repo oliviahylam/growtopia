@@ -1,0 +1,2748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Growtopia - P5.js Isometric Farm MVP</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+        
+        body {
+            margin: 0;
+            padding: 50px 0 0 0; /* Add padding for top bar */
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            font-family: 'Press Start 2P', cursive;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        
+        #game-container {
+            position: relative;
+            border: 4px solid #34495e;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            background: white;
+        }
+        
+        /* Intro Pop-ups */
+        .intro-popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        }
+        
+        .popup-content {
+            background: linear-gradient(145deg, #34495e, #2c3e50);
+            border: 3px solid #f39c12;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 500px;
+            text-align: center;
+            color: white;
+            box-shadow: 0 0 30px rgba(243, 156, 18, 0.5);
+        }
+        
+        .popup-content h2 {
+            color: #f39c12;
+            margin-bottom: 20px;
+            font-size: 16px;
+        }
+        
+        .popup-content p {
+            font-size: 10px;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+        
+        .popup-button {
+            background: linear-gradient(145deg, #27ae60, #2ecc71);
+            border: 2px solid #2ecc71;
+            color: white;
+            padding: 12px 24px;
+            font-family: inherit;
+            font-size: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .popup-button:hover {
+            background: linear-gradient(145deg, #2ecc71, #27ae60);
+            transform: translateY(-2px);
+        }
+        
+        /* TOP UI BAR */
+        .top-ui-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50px;
+            background: linear-gradient(145deg, #34495e, #2c3e50);
+            border-bottom: 3px solid #f39c12;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 1000;
+            font-size: 10px;
+            color: white;
+        }
+        
+        .weather-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .weather-icon {
+            font-size: 20px;
+            animation: weatherPulse 3s ease-in-out infinite;
+        }
+        
+        @keyframes weatherPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        .currency-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .coin-counter {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+            color: #f39c12;
+        }
+        
+        .xp-section {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .xp-bar {
+            width: 120px;
+            height: 6px;
+            background: #34495e;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .xp-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #27ae60, #2ecc71);
+            transition: width 0.5s ease;
+        }
+
+        /* Main UI Panels */
+        .ui-panel {
+            position: absolute;
+            background: rgba(44, 62, 80, 0.95);
+            border: 2px solid #34495e;
+            border-radius: 8px;
+            padding: 12px;
+            color: white;
+            font-size: 9px;
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+        }
+        
+        .ui-panel h3 {
+            margin: 0 0 10px 0;
+            color: #f39c12;
+            font-size: 10px;
+            text-align: center;
+            border-bottom: 1px solid #34495e;
+            padding-bottom: 8px;
+        }
+        
+        /* Resources Panel */
+        #resources-panel {
+            top: 10px;
+            left: 10px;
+            width: 180px;
+        }
+        
+        .resource-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+            align-items: center;
+        }
+        
+        /* Weather Panel */
+        #weather-panel {
+            top: 10px;
+            right: 10px;
+            width: 160px;
+        }
+        
+        .weather-info {
+            text-align: center;
+            margin: 8px 0;
+        }
+        
+        .weather-icon {
+            font-size: 20px;
+            margin: 5px 0;
+        }
+        
+        /* Plant Status Panel */
+        #plant-status-panel {
+            bottom: 10px;
+            left: 10px;
+            width: 250px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .plant-status-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 4px 0;
+            padding: 4px;
+            background: rgba(52, 73, 94, 0.5);
+            border-radius: 4px;
+        }
+        
+        .plant-icons {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .status-icon {
+            font-size: 10px;
+        }
+        
+        .needs-water { color: #3498db; }
+        .unhealthy { color: #e74c3c; }
+        .ready-harvest { color: #f39c12; }
+        .healthy { color: #27ae60; }
+        
+        /* Shop Panel */
+        #shop-panel {
+            bottom: 10px;
+            right: 10px;
+            width: 200px;
+        }
+        
+        .shop-category {
+            margin: 10px 0;
+        }
+        
+        .shop-category h4 {
+            color: #f39c12;
+            font-size: 8px;
+            margin: 5px 0;
+            border-bottom: 1px solid #34495e;
+            padding-bottom: 3px;
+        }
+        
+        .shop-button {
+            background: linear-gradient(145deg, #27ae60, #2ecc71);
+            border: 1px solid #2ecc71;
+            color: white;
+            padding: 6px 8px;
+            margin: 2px 0;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 7px;
+            border-radius: 3px;
+            width: 100%;
+            transition: all 0.2s ease;
+        }
+        
+        .shop-button:hover {
+            background: linear-gradient(145deg, #2ecc71, #27ae60);
+            transform: translateY(-1px);
+        }
+        
+        .shop-button:disabled {
+            background: #7f8c8d;
+            border-color: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .shop-button:active {
+            transform: translateY(1px);
+        }
+        
+        /* Inventory Panel */
+        #inventory-panel {
+            top: 180px;
+            left: 10px;
+            width: 180px;
+        }
+        
+        /* Narrative Panel */
+        #narrative-panel {
+            top: 180px;
+            right: 10px;
+            width: 160px;
+        }
+        
+        .narrative-text {
+            font-style: italic;
+            color: #ecf0f1;
+            font-size: 8px;
+            line-height: 1.4;
+            text-align: center;
+        }
+        
+        /* Animal Helper */
+        .animal-helper {
+            position: absolute;
+            font-size: 16px;
+            z-index: 100;
+            animation: hop 2s infinite ease-in-out;
+        }
+        
+        @keyframes hop {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+        
+        /* Notifications */
+        .notification {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(44, 62, 80, 0.95);
+            color: #f39c12;
+            padding: 15px 25px;
+            border-radius: 8px;
+            font-size: 10px;
+            z-index: 9999;
+            border: 2px solid #f39c12;
+            animation: fadeInOut 3s ease-in-out;
+        }
+        
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+            20%, 80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+        
+        /* Tools Indicators */
+        .tool-indicator {
+            position: absolute;
+            font-size: 12px;
+            z-index: 50;
+        }
+        
+        .sprinkler { color: #3498db; }
+        .greenhouse { color: #27ae60; }
+        
+        /* ANIMATION ENHANCEMENTS */
+        
+        /* Plant animations */
+        @keyframes plantSway {
+            0%, 100% { transform: rotate(-1deg); }
+            50% { transform: rotate(1deg); }
+        }
+        
+        @keyframes plantGrow {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        @keyframes plantPulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.9; }
+        }
+        
+        /* Water animation */
+        @keyframes waterDrop {
+            0% { transform: translateY(-10px); opacity: 1; }
+            100% { transform: translateY(20px); opacity: 0; }
+        }
+        
+        .water-effect {
+            position: absolute;
+            color: #3498db;
+            font-size: 12px;
+            animation: waterDrop 1s ease-out forwards;
+            pointer-events: none;
+        }
+        
+        /* Coin collection animation */
+        @keyframes coinCollect {
+            0% { transform: scale(1) translateY(0); opacity: 1; }
+            50% { transform: scale(1.5) translateY(-20px); opacity: 0.8; }
+            100% { transform: scale(0) translateY(-40px); opacity: 0; }
+        }
+        
+        .coin-animation {
+            position: absolute;
+            font-size: 14px;
+            color: #f39c12;
+            animation: coinCollect 1s ease-out forwards;
+            pointer-events: none;
+            z-index: 1001;
+        }
+        
+        /* Weather effects */
+        .weather-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            z-index: 100;
+        }
+        
+        .rain-drop {
+            position: absolute;
+            width: 2px;
+            height: 8px;
+            background: linear-gradient(transparent, #3498db);
+            animation: rainFall 1s linear infinite;
+        }
+        
+        @keyframes rainFall {
+            to { transform: translateY(100vh); }
+        }
+        
+        .snow-flake {
+            position: absolute;
+            color: white;
+            font-size: 8px;
+            animation: snowFall 3s linear infinite;
+        }
+        
+        @keyframes snowFall {
+            to { transform: translateY(100vh) rotate(360deg); }
+        }
+        
+        .sunbeam {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, rgba(255,255,0,0.2) 0%, rgba(255,255,0,0) 70%);
+            animation: sunbeamPulse 4s ease-in-out infinite;
+        }
+        
+        @keyframes sunbeamPulse {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.2); }
+        }
+        
+        /* Purchase notification */
+        .purchase-notification {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(44, 62, 80, 0.95);
+            color: #f39c12;
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-size: 9px;
+            z-index: 9999;
+            border: 2px solid #f39c12;
+            animation: purchaseNotify 2s ease-in-out forwards;
+        }
+        
+        @keyframes purchaseNotify {
+            0%, 100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+            20%, 80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+        
+        /* Plant status bubbles */
+        .status-bubble {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 2px 4px;
+            border-radius: 8px;
+            font-size: 8px;
+            z-index: 150;
+            pointer-events: none;
+        }
+        
+        .status-ring {
+            position: absolute;
+            border: 2px solid;
+            border-radius: 50%;
+            z-index: 149;
+            pointer-events: none;
+            animation: statusPulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes statusPulse {
+            0%, 100% { opacity: 0.7; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.1); }
+        }
+        
+        .status-ring.healthy { border-color: #27ae60; }
+        .status-ring.needs-care { border-color: #f39c12; }
+        .status-ring.sick { border-color: #e74c3c; }
+        
+        /* Button shake animation */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        
+        /* Inventory panel enhancements */
+        .inventory-section {
+            margin: 8px 0;
+        }
+        
+        .inventory-section h4 {
+            color: #f39c12;
+            font-size: 8px;
+            margin: 5px 0 3px 0;
+            border-bottom: 1px solid #34495e;
+            padding-bottom: 2px;
+        }
+        
+        .inventory-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 3px 0;
+            font-size: 8px;
+        }
+        
+        /* NEW: Tool Selection Styles */
+        .tool-button {
+            background: linear-gradient(145deg, #8e44ad, #9b59b6);
+            border: 2px solid #9b59b6;
+            color: white;
+            padding: 8px 12px;
+            margin: 3px 0;
+            width: 100%;
+            font-family: inherit;
+            font-size: 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .tool-button:hover {
+            background: linear-gradient(145deg, #9b59b6, #8e44ad);
+            transform: translateY(-1px);
+        }
+        
+        .tool-button.selected {
+            background: linear-gradient(145deg, #f39c12, #e67e22);
+            border-color: #f39c12;
+            box-shadow: 0 0 10px rgba(243, 156, 18, 0.5);
+        }
+        
+        .tool-button:disabled {
+            background: linear-gradient(145deg, #7f8c8d, #95a5a6);
+            border-color: #95a5a6;
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .tool-section {
+            margin: 10px 0;
+        }
+        
+        .tool-info {
+            border-top: 1px solid #34495e;
+            padding-top: 8px;
+            margin-top: 8px;
+        }
+        
+        /* Debug mode styles */
+        .debug-info {
+            position: fixed;
+            top: 60px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #00ff00;
+            padding: 8px;
+            font-size: 8px;
+            font-family: monospace;
+            border-radius: 4px;
+            min-width: 200px;
+        }
+    </style>
+</head>
+<body>
+    <!-- TOP UI BAR -->
+    <div class="top-ui-bar">
+        <div class="weather-section">
+            <div class="weather-icon" id="top-weather-icon">☀️</div>
+            <div>
+                <div id="top-weather-condition">Sunny</div>
+            </div>
+        </div>
+        
+        <div class="currency-section">
+            <div class="coin-counter">
+                <span>🍃</span>
+                <span id="top-coin-count">150</span>
+            </div>
+            
+            <div class="xp-section">
+                <span>⭐</span>
+                <div class="xp-bar">
+                    <div class="xp-fill" id="xp-fill" style="width: 35%;"></div>
+                </div>
+                <span id="xp-level">Lv.1</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="game-container">
+        <!-- P5.js canvas will be inserted here -->
+    </div>
+    
+    <!-- Weather Overlay for Effects -->
+    <div class="weather-overlay" id="weather-overlay"></div>
+    
+    <!-- Intro Pop-ups -->
+    <div id="intro-popup-1" class="intro-popup">
+        <div class="popup-content">
+            <h2>🌱 Welcome to Growtopia!</h2>
+            <p>
+                Welcome, farmer! You've inherited a magical plot of land where crops grow with the rhythm of nature and weather. 
+                Your goal is to build a thriving farm by planting seeds, caring for your crops, and expanding your agricultural empire.
+            </p>
+            <p>
+                The land responds to weather patterns, so pay attention to rain, drought, and seasonal changes. 
+                Your crops need water, protection from pollution, and animal helpers to truly flourish!
+            </p>
+            <button class="popup-button" onclick="showIntroPopup2()">Continue →</button>
+        </div>
+    </div>
+    
+    <div id="intro-popup-2" class="intro-popup" style="display: none;">
+        <div class="popup-content">
+            <h2>🎮 How to Get Started</h2>
+            <p>
+                <strong>Basic Controls:</strong><br>
+                • Click any empty green tile to plant seeds<br>
+                • Right-click mature crops to harvest them<br>
+                • Buy seeds and tools from the shop<br>
+                • Watch the weather - it affects your crops!
+            </p>
+            <p>
+                <strong>Pro Tips:</strong><br>
+                • Plants need water regularly (watch for blue droplets)<br>
+                • Animal helpers protect crops from pests<br>
+                • Sprinklers auto-water nearby tiles<br>
+                • Check plant status panel for crop health
+            </p>
+            <button class="popup-button" onclick="startGame()">Start Farming! 🚜</button>
+        </div>
+    </div>
+    
+    <!-- Main UI Panels -->
+    
+    <!-- NEW: Tool Selection Panel -->
+    <div id="tool-panel" class="ui-panel" style="top: 320px; left: 10px; width: 180px;">
+        <h3>🧰 Tools</h3>
+        <div class="tool-section">
+            <button class="tool-button" onclick="selectTool('watering_can')" id="tool-watering-can">
+                🪣 Watering Can <span id="tool-watering-count">1</span>
+            </button>
+            <button class="tool-button" onclick="selectTool('pesticide')" id="tool-pesticide">
+                🧪 Pesticide <span id="tool-pesticide-count">0</span>
+            </button>
+            <button class="tool-button" onclick="selectTool('solar_lamp')" id="tool-solar-lamp">
+                💡 Solar Lamp <span id="tool-solar-count">0</span>
+            </button>
+        </div>
+        <div class="tool-info">
+            <p style="font-size: 8px; margin: 5px 0;">
+                <strong>Selected:</strong> <span id="selected-tool-display">None</span>
+            </p>
+            <p style="font-size: 7px; margin: 0; color: #777;">
+                Click tool, then click crop to use
+            </p>
+        </div>
+    </div>
+    
+    <!-- Resources Panel -->
+    <div id="resources-panel" class="ui-panel">
+        <h3>🌾 Farm Resources</h3>
+        <div class="resource-item">
+            <span>🪙 Leaf Coins:</span>
+            <span id="coins">150</span>
+        </div>
+        <div class="resource-item">
+            <span>🌰 Apple Seeds:</span>
+            <span id="apple-seeds">8</span>
+        </div>
+        <div class="resource-item">
+            <span>🥕 Carrot Seeds:</span>
+            <span id="carrot-seeds">5</span>
+        </div>
+        <div class="resource-item">
+            <span>🍎 Harvested:</span>
+            <span id="harvested">0</span>
+        </div>
+        <div class="resource-item">
+            <span>⭐ Farm Level:</span>
+            <span id="farm-level">1</span>
+        </div>
+    </div>
+    
+    <!-- Weather Panel -->
+    <div id="weather-panel" class="ui-panel">
+        <h3>🌦️ Environment</h3>
+        <div class="weather-info">
+            <div class="weather-icon" id="weather-icon">☀️</div>
+            <div id="weather-condition">Sunny</div>
+            <div id="temperature">22°C</div>
+        </div>
+        <div class="resource-item">
+            <span>💧 Humidity:</span>
+            <span id="humidity">65%</span>
+        </div>
+        <div class="resource-item">
+            <span>🏭 Pollution:</span>
+            <span id="pollution">Low</span>
+        </div>
+        <div class="resource-item">
+            <span>🌱 Soil Quality:</span>
+            <span id="soil-quality">Rich</span>
+        </div>
+    </div>
+    
+    <!-- Plant Status Panel -->
+    <div id="plant-status-panel" class="ui-panel">
+        <h3>🌱 Plant Status</h3>
+        <div id="plant-status-list">
+            <div style="text-align: center; color: #95a5a6; font-size: 8px;">
+                No crops planted yet
+            </div>
+        </div>
+    </div>
+    
+    <!-- Enhanced Inventory Panel -->
+    <div id="inventory-panel" class="ui-panel" style="top: 70px; left: 10px; width: 180px;">
+        <h3>📦 Inventory</h3>
+        
+        <div class="inventory-section">
+            <h4>Seeds</h4>
+            <div class="inventory-item">
+                <span>🌰 Apple Seeds:</span>
+                <span id="inv-apple-seeds">8</span>
+            </div>
+            <div class="inventory-item">
+                <span>🥕 Carrot Seeds:</span>
+                <span id="inv-carrot-seeds">5</span>
+            </div>
+        </div>
+        
+        <div class="inventory-section">
+            <h4>Tools</h4>
+            <div class="inventory-item">
+                <span>🪣 Watering Can:</span>
+                <span id="inv-watering-cans">1</span>
+            </div>
+            <div class="inventory-item">
+                <span>💧 Sprinklers:</span>
+                <span id="inv-sprinklers">0</span>
+            </div>
+            <div class="inventory-item">
+                <span>🏠 Greenhouses:</span>
+                <span id="inv-greenhouses">0</span>
+            </div>
+            <div class="inventory-item">
+                <span>🐓 Chickens:</span>
+                <span id="inv-animals">0</span>
+            </div>
+        </div>
+        
+        <div class="inventory-section">
+            <h4>Harvested Fruits</h4>
+            <div class="inventory-item">
+                <span>🍎 Apples:</span>
+                <span id="inv-harvested-apples">0</span>
+            </div>
+            <div class="inventory-item">
+                <span>🥕 Carrots:</span>
+                <span id="inv-harvested-carrots">0</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Shop Panel -->
+    <div id="shop-panel" class="ui-panel">
+        <h3>🛒 Farm Shop</h3>
+        
+        <div class="shop-category">
+            <h4>Seeds</h4>
+            <button class="shop-button" onclick="buyItem('apple-seeds', 15, 3)">🌰 Apple Seeds x3 (15🪙)</button>
+            <button class="shop-button" onclick="buyItem('carrot-seeds', 10, 3)">🥕 Carrot Seeds x3 (10🪙)</button>
+        </div>
+        
+        <div class="shop-category">
+            <h4>Tools</h4>
+            <button class="shop-button" onclick="buyItem('sprinkler', 75, 1)">💧 Sprinkler (75🪙)</button>
+            <button class="shop-button" onclick="buyItem('greenhouse', 200, 1)">🏠 Greenhouse (200🪙)</button>
+        </div>
+        
+        <div class="shop-category">
+            <h4>Helpers</h4>
+            <button class="shop-button" onclick="buyItem('animal', 100, 1)">🐓 Chicken Helper (100🪙)</button>
+        </div>
+    </div>
+    
+    <!-- Narrative Panel -->
+    <div id="narrative-panel" class="ui-panel">
+        <h3>🧙‍♂️ Farm Spirit</h3>
+        <div class="narrative-text" id="narrative-text">
+            "Welcome to your new farm! The soil here is rich with ancient magic..."
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+    <script>
+        // =============================================================================
+        // GAME CONFIGURATION
+        // =============================================================================
+        
+        const CONFIG = {
+            CANVAS_WIDTH: 800,
+            CANVAS_HEIGHT: 600,
+            GRID_WIDTH: 8,
+            GRID_HEIGHT: 8,
+            TILE_WIDTH: 64,
+            TILE_HEIGHT: 32,
+            GROWTH_INTERVAL: 5000, // 5 seconds per stage
+            WATER_INTERVAL: 15000, // 15 seconds before needing water
+            WEATHER_API_KEY: '82b76cced925fdddfbe8866df6f66045', // From previous Growtopia
+            
+            // NEW: Enhanced weather and plant status system
+            WEATHER_UPDATE_INTERVAL: 300000, // 5 minutes
+            PEST_CHANCE: 0.01, // 1% per update cycle
+            SICKNESS_THRESHOLD: 3, // Days without care
+            DEBUG_MODE: true, // Toggle for testing (TEMPORARILY ENABLED)
+            
+            // Tool effects
+            TOOL_EFFECTS: {
+                watering_can: { water: 100, cost: 0 },
+                solar_lamp: { sunlight: 50, cost: 25 },
+                pesticide: { pest_removal: true, cost: 10 }
+            }
+        };
+        
+        // =============================================================================
+        // GAME STATE
+        // =============================================================================
+        
+        let gameState = {
+            // Core game data
+            grid: [],
+            coins: 150,
+            appleSeeds: 8,
+            carrotSeeds: 5,
+            harvested: 0,
+            farmLevel: 1,
+            
+            // Inventory
+            wateringCans: 1,
+            sprinklers: 0,
+            greenhouses: 0,
+            animals: 0,
+            
+            // NEW: Tool inventory and selection
+            tools: {
+                watering_can: 1,
+                solar_lamp: 0,
+                pesticide: 0
+            },
+            selectedTool: null, // Currently selected tool
+            
+            // Interaction
+            selectedTile: null,
+            showPlantMenu: false,
+            plantMenuPos: { x: 0, y: 0 },
+            
+            // Environment - Enhanced weather system
+            weather: {
+                condition: 'Sunny', // Rain, Sunny, Cloudy, Snow
+                temperature: 22,
+                humidity: 65,
+                pollution: 'Low',
+                soilQuality: 'Rich',
+                icon: '☀️',
+                lastApiUpdate: 0
+            },
+            
+            // Game flow
+            gameStarted: false,
+            lastWeatherUpdate: 0,
+            lastNarrativeUpdate: 0,
+            
+            // Tools placed on grid
+            placedSprinklers: [],
+            placedGreenhouses: [],
+            animalHelpers: [],
+            
+            // NEW: Loaded tool/weather assets
+            toolAssets: {},
+            weatherAssets: {}
+        };
+        
+        const PRICES = {
+            'apple-seeds': 15,
+            'carrot-seeds': 10,
+            'sprinkler': 75,
+            'greenhouse': 200,
+            'animal': 100
+        };
+        
+        const HARVEST_REWARDS = {
+            apple: 25,
+            carrot: 15
+        };
+        
+        const NARRATIVE_MESSAGES = [
+            "The morning dew makes crops grow faster...",
+            "Your chickens are keeping the pests away!",
+            "The soil here has ancient farming magic...",
+            "Rain clouds are gathering - perfect for crops!",
+            "Your farm is becoming the talk of the village!",
+            "The sprinklers are working beautifully today.",
+            "Plant diversity makes the ecosystem stronger!",
+            "Your green thumb is truly magical!",
+            "The harvest moon brings good fortune...",
+            "Wildlife is returning to your healthy farm!"
+        ];
+        
+        // =============================================================================
+        // ENHANCED CROP CLASS
+        // =============================================================================
+        
+        class Crop {
+            constructor(type, x, y) {
+                this.type = type;
+                this.x = x;
+                this.y = y;
+                this.stage = 0; // Growth stages 0-4 (5 total stages)
+                this.maxStage = 4; // Stage 4 = fully grown (stage 5 PNG)
+                this.plantTime = Date.now();
+                this.lastGrowthTime = Date.now();
+                this.lastWaterTime = Date.now();
+                this.lastCareTime = Date.now();
+                this.isReady = false;
+                this.health = 100;
+                this.needsWater = false;
+                this.isProtected = false; // By animal helpers
+                this.growthInterval = 4000; // 4 seconds per stage
+                
+                // NEW: Enhanced plant status system
+                this.waterLevel = 100; // 0-100
+                this.sunlightLevel = 50; // 0-100, affected by weather and solar lamps
+                this.hasPests = false;
+                this.isSick = false;
+                this.lastPestCheck = Date.now();
+                this.statusEmoji = null; // Current status emoji to display
+                this.tintColor = 'healthy'; // healthy, attention, sick
+                
+                console.log(`🌱 NEW CROP: Planted ${this.type} at (${this.x}, ${this.y}) - Starting at stage ${this.stage + 1}, will grow every ${this.growthInterval/1000}s`);
+            }
+            
+            update() {
+                const now = Date.now();
+                
+                // NEW: Update water level over time
+                const timeSinceWater = now - this.lastWaterTime;
+                this.waterLevel = Math.max(0, 100 - (timeSinceWater / CONFIG.WATER_INTERVAL) * 100);
+                this.needsWater = this.waterLevel < 30;
+                
+                // NEW: Update sunlight based on weather
+                this.updateSunlightLevel();
+                
+                // NEW: Check for random pest events
+                this.checkForPests(now);
+                
+                // NEW: Check if plant is getting sick from neglect
+                this.checkSickness(now);
+                
+                // NEW: Determine current status emoji and tint
+                this.updateStatus();
+                
+                // Check for sprinkler auto-watering
+                this.checkSprinklerCoverage();
+                
+                // Check for pollution effects
+                this.applyEnvironmentalEffects();
+                
+                // Apple Tree Growth Logic - 4 seconds per stage
+                // NEW: Growth affected by overall plant health
+                const growthModifier = this.calculateGrowthModifier();
+                const adjustedGrowthInterval = this.growthInterval / growthModifier;
+                
+                // DETAILED DEBUG LOGGING
+                if (CONFIG.DEBUG_MODE && this.stage < this.maxStage) {
+                    const timeLeft = adjustedGrowthInterval - (now - this.lastGrowthTime);
+                    const canGrow = this.health > 30 && !this.isSick;
+                    
+                    // Log every 2 seconds to avoid spam
+                    if (Math.floor(timeLeft / 2000) !== Math.floor((timeLeft + 100) / 2000)) {
+                        console.log(`🐛 DEBUG ${this.type}(${this.x},${this.y}): stage=${this.stage}, timeLeft=${Math.ceil(timeLeft/1000)}s, health=${this.health}, sick=${this.isSick}, canGrow=${canGrow}, modifier=${growthModifier.toFixed(2)}`);
+                    }
+                }
+                
+                if (this.stage < this.maxStage && 
+                    now - this.lastGrowthTime > adjustedGrowthInterval &&
+                    this.health > 30 && !this.isSick) {
+                    
+                    const oldStage = this.stage;
+                    this.stage++;
+                    this.lastGrowthTime = now;
+                    
+                    // Debug logging
+                    console.log(`🌱 GROWTH: ${this.type} at (${this.x}, ${this.y}) grew from stage ${oldStage + 1} to ${this.stage + 1} (PNG: apple_stage_0${this.stage + 1}.png)`);
+                    
+                    if (this.stage === this.maxStage) {
+                        this.isReady = true;
+                        this.statusEmoji = '🍎';
+                        console.log(`🍎 ${this.type} at (${this.x}, ${this.y}) is fully grown! (Stage ${this.stage + 1})`);
+                        showPurchaseNotification(`🍎 Apple tree fully grown!`);
+                    } else {
+                        console.log(`🌿 ${this.type} at (${this.x}, ${this.y}) grew to stage ${this.stage + 1}`);
+                        showPurchaseNotification(`🌿 Apple tree grew to stage ${this.stage + 1}!`);
+                    }
+                }
+            }
+            
+            checkSprinklerCoverage() {
+                for (let sprinkler of gameState.placedSprinklers) {
+                    const distance = Math.abs(this.x - sprinkler.x) + Math.abs(this.y - sprinkler.y);
+                    if (distance <= 2) { // Sprinkler range
+                        this.water();
+                        break;
+                    }
+                }
+            }
+            
+            applyEnvironmentalEffects() {
+                // Weather effects
+                if (gameState.weather.condition === 'Rainy') {
+                    this.water();
+                } else if (gameState.weather.condition === 'Drought') {
+                    this.needsWater = true;
+                }
+                
+                // Pollution effects
+                if (gameState.weather.pollution === 'High' && !this.isProtected) {
+                    this.health = Math.max(0, this.health - 0.5);
+                }
+            }
+            
+            water() {
+                this.needsWater = false;
+                this.lastWaterTime = Date.now();
+                this.waterLevel = 100;
+                this.health = Math.min(100, this.health + 10);
+                this.lastCareTime = Date.now();
+            }
+            
+            // NEW: Enhanced plant status methods
+            updateSunlightLevel() {
+                const weather = gameState.weather.condition;
+                let baseSunlight = 50;
+                
+                // Weather effects on sunlight
+                switch(weather) {
+                    case 'Sunny': baseSunlight = 100; break;
+                    case 'Cloudy': baseSunlight = 30; break;
+                    case 'Rain': baseSunlight = 20; break;
+                    case 'Snow': baseSunlight = 10; break;
+                }
+                
+                this.sunlightLevel = Math.min(100, baseSunlight);
+            }
+            
+            checkForPests(now) {
+                // Random pest events
+                if (now - this.lastPestCheck > 10000 && !this.isProtected) { // Check every 10 seconds
+                    if (Math.random() < CONFIG.PEST_CHANCE) {
+                        this.hasPests = true;
+                        this.health = Math.max(20, this.health - 20);
+                        console.log(`🐛 ${this.type} at (${this.x}, ${this.y}) got pests!`);
+                    }
+                    this.lastPestCheck = now;
+                }
+            }
+            
+            checkSickness(now) {
+                const daysSinceCare = (now - this.lastCareTime) / (1000 * 60 * 60 * 24);
+                if (daysSinceCare > CONFIG.SICKNESS_THRESHOLD || this.health < 30) {
+                    this.isSick = true;
+                    this.health = Math.max(10, this.health - 1);
+                } else {
+                    this.isSick = false;
+                }
+            }
+            
+            updateStatus() {
+                // Priority order for status emoji
+                if (this.isReady) {
+                    this.statusEmoji = '🍎';
+                    this.tintColor = 'healthy';
+                } else if (this.isSick) {
+                    this.statusEmoji = '😷';
+                    this.tintColor = 'sick';
+                } else if (this.hasPests) {
+                    this.statusEmoji = '🐛';
+                    this.tintColor = 'sick';
+                } else if (this.needsWater) {
+                    this.statusEmoji = '💧';
+                    this.tintColor = 'attention';
+                } else if (this.sunlightLevel < 30 && (gameState.weather.condition === 'Cloudy' || gameState.weather.condition === 'Snow')) {
+                    this.statusEmoji = '☀️';
+                    this.tintColor = 'attention';
+                } else if (gameState.weather.condition === 'Snow') {
+                    this.statusEmoji = '❄️';
+                    this.tintColor = 'attention';
+                } else {
+                    this.statusEmoji = null;
+                    this.tintColor = 'healthy';
+                }
+            }
+            
+            calculateGrowthModifier() {
+                let modifier = 1.0;
+                
+                // Weather effects
+                switch(gameState.weather.condition) {
+                    case 'Sunny': modifier *= 1.2; break;
+                    case 'Rain': modifier *= 1.1; break;
+                    case 'Cloudy': modifier *= 1.0; break;
+                    case 'Snow': modifier *= 0.7; break;
+                }
+                
+                // Health effects
+                if (this.health > 80) modifier *= 1.1;
+                else if (this.health < 40) modifier *= 0.8;
+                
+                // Water and sunlight effects
+                if (this.waterLevel > 70 && this.sunlightLevel > 60) modifier *= 1.05;
+                
+                return Math.max(0.1, modifier);
+            }
+            
+            // NEW: Tool usage methods
+            useTool(toolType) {
+                this.lastCareTime = Date.now();
+                
+                switch(toolType) {
+                    case 'watering_can':
+                        this.water();
+                        return true;
+                        
+                    case 'pesticide':
+                        if (this.hasPests) {
+                            this.hasPests = false;
+                            this.health = Math.min(100, this.health + 15);
+                            console.log(`🧽 Removed pests from ${this.type} at (${this.x}, ${this.y})`);
+                            return true;
+                        }
+                        return false;
+                        
+                    case 'solar_lamp':
+                        this.sunlightLevel = Math.min(100, this.sunlightLevel + 50);
+                        console.log(`💡 Added solar lamp near ${this.type} at (${this.x}, ${this.y})`);
+                        return true;
+                        
+                    default:
+                        return false;
+                }
+            }
+            
+            getColor() {
+                if (this.health < 30) {
+                    return color(139, 69, 19); // Brown for unhealthy
+                }
+                
+                const colors = {
+                    apple: [color(144, 238, 144), color(50, 205, 50), color(34, 139, 34), color(0, 100, 0), color(255, 0, 0)],
+                    carrot: [color(144, 238, 144), color(50, 205, 50), color(255, 140, 0), color(255, 99, 71)]
+                };
+                return colors[this.type][this.stage] || colors[this.type][0];
+            }
+            
+            getSize() {
+                return 15 + this.stage * 5;
+            }
+            
+            getStatusIcons() {
+                let icons = [];
+                if (this.needsWater) icons.push({ icon: '💧', class: 'needs-water' });
+                if (this.health < 50) icons.push({ icon: '🚨', class: 'unhealthy' });
+                if (this.isReady) icons.push({ icon: '✅', class: 'ready-harvest' });
+                if (this.health >= 80 && !this.needsWater) icons.push({ icon: '🌿', class: 'healthy' });
+                return icons;
+            }
+        }
+        
+        // =============================================================================
+        // ENHANCED TILE CLASS
+        // =============================================================================
+        
+        class Tile {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.crop = null;
+                this.type = 'grass';
+                this.hasSprinkler = false;
+                this.hasGreenhouse = false;
+                this.fertility = 75 + Math.random() * 25; // Random fertility
+            }
+            
+            plantCrop(cropType = 'apple') {
+                const cost = PRICES[cropType + '-seeds'];
+                const seedCount = gameState[cropType + 'Seeds'];
+                
+                if (this.crop === null && gameState.coins >= cost && seedCount > 0) {
+                    this.crop = new Crop(cropType, this.x, this.y);
+                    this.type = 'soil';
+                    gameState.coins -= cost;
+                    gameState[cropType + 'Seeds']--;
+                    
+                    console.log(`✅ Planted ${cropType} at (${this.x}, ${this.y})`);
+                    showPurchaseNotification(`🌱 Planted ${cropType} tree!`);
+                    
+                    // Check for animal protection
+                    this.crop.isProtected = this.checkAnimalProtection();
+                    
+                    updateAllUI();
+                    showNotification(`Planted ${cropType}! (-${cost}🪙)`);
+                    return true;
+                }
+                return false;
+            }
+            
+            harvestCrop() {
+                if (this.crop && this.crop.isReady) {
+                    const reward = HARVEST_REWARDS[this.crop.type];
+                    const cropType = this.crop.type;
+                    
+                    // Update game state
+                    gameState.coins += reward;
+                    gameState.harvested++;
+                    
+                    // Update harvested fruits inventory
+                    if (cropType === 'apple') {
+                        gameState.harvestedApples = (gameState.harvestedApples || 0) + 1;
+                    } else if (cropType === 'carrot') {
+                        gameState.harvestedCarrots = (gameState.harvestedCarrots || 0) + 1;
+                    }
+                    
+                    // Level up logic
+                    if (gameState.harvested % 10 === 0) {
+                        gameState.farmLevel++;
+                        showPurchaseNotification(`🎉 Farm Level Up! Now level ${gameState.farmLevel}!`);
+                    }
+                    
+                    // Add coin animation
+                    addCoinAnimation(this.x, this.y, reward);
+                    
+                    this.crop = null;
+                    this.type = 'grass';
+                    updateAllUI();
+                    showPurchaseNotification(`✅ Harvested ${cropType}! (+${reward}🍃)`);
+                    return true;
+                }
+                return false;
+            }
+            
+            checkAnimalProtection() {
+                for (let animal of gameState.animalHelpers) {
+                    const distance = Math.abs(this.x - animal.x) + Math.abs(this.y - animal.y);
+                    if (distance <= 3) { // Animal protection range
+                        return true;
+                    }
+                }
+                return false;
+            }
+            
+            update() {
+                if (this.crop) {
+                    this.crop.update();
+                }
+            }
+        }
+        
+        // =============================================================================
+        // WEATHER SYSTEM (Using API from previous Growtopia)
+        // =============================================================================
+        
+        async function updateWeather() {
+            try {
+                const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=San Francisco&appid=${CONFIG.WEATHER_API_KEY}&units=metric`);
+                const data = await response.json();
+                
+                // Map weather conditions
+                const weatherMap = {
+                    'clear sky': { condition: 'Sunny', icon: '☀️' },
+                    'few clouds': { condition: 'Partly Cloudy', icon: '⛅' },
+                    'scattered clouds': { condition: 'Cloudy', icon: '☁️' },
+                    'broken clouds': { condition: 'Overcast', icon: '☁️' },
+                    'shower rain': { condition: 'Rainy', icon: '🌧️' },
+                    'rain': { condition: 'Rainy', icon: '🌧️' },
+                    'thunderstorm': { condition: 'Stormy', icon: '⛈️' },
+                    'snow': { condition: 'Snowy', icon: '❄️' },
+                    'mist': { condition: 'Foggy', icon: '🌫️' }
+                };
+                
+                const weather = weatherMap[data.weather[0].description] || { condition: 'Sunny', icon: '☀️' };
+                
+                gameState.weather = {
+                    condition: weather.condition,
+                    temperature: Math.round(data.main.temp),
+                    humidity: data.main.humidity,
+                    pollution: Math.random() > 0.7 ? 'High' : 'Low',
+                    soilQuality: 'Rich',
+                    icon: weather.icon
+                };
+                
+                console.log('Weather updated from API:', gameState.weather);
+            } catch (error) {
+                console.log('Using simulated weather:', error);
+                simulateWeather();
+            }
+            
+            updateWeatherUI();
+        }
+        
+        function simulateWeather() {
+            const conditions = [
+                { condition: 'Sunny', icon: '☀️' },
+                { condition: 'Partly Cloudy', icon: '⛅' },
+                { condition: 'Rainy', icon: '🌧️' },
+                { condition: 'Cloudy', icon: '☁️' },
+                { condition: 'Drought', icon: '🌵' }
+            ];
+            
+            const weather = conditions[Math.floor(Math.random() * conditions.length)];
+            gameState.weather = {
+                ...weather,
+                temperature: Math.floor(Math.random() * 20) + 15,
+                humidity: Math.floor(Math.random() * 40) + 40,
+                pollution: Math.random() > 0.8 ? 'High' : 'Low',
+                soilQuality: 'Rich'
+            };
+        }
+        
+        // =============================================================================
+        // COORDINATE CONVERSION
+        // =============================================================================
+        
+        function worldToScreen(worldX, worldY) {
+            const screenX = (worldX - worldY) * CONFIG.TILE_WIDTH / 2;
+            const screenY = (worldX + worldY) * CONFIG.TILE_HEIGHT / 2;
+            return {
+                x: screenX + width / 2,
+                y: screenY + 150
+            };
+        }
+        
+        function screenToWorld(screenX, screenY) {
+            const adjustedX = screenX - width / 2;
+            const adjustedY = screenY - 150;
+            const worldX = (adjustedX / (CONFIG.TILE_WIDTH / 2) + adjustedY / (CONFIG.TILE_HEIGHT / 2)) / 2;
+            const worldY = (adjustedY / (CONFIG.TILE_HEIGHT / 2) - adjustedX / (CONFIG.TILE_WIDTH / 2)) / 2;
+            return {
+                x: Math.floor(worldX),
+                y: Math.floor(worldY)
+            };
+        }
+        
+        function isValidTile(x, y) {
+            return x >= 0 && x < CONFIG.GRID_WIDTH && y >= 0 && y < CONFIG.GRID_HEIGHT;
+        }
+        
+        // =============================================================================
+        // DRAWING FUNCTIONS
+        // =============================================================================
+        
+        function drawIsometricTile(screenX, screenY, tileColor, strokeColor = null) {
+            push();
+            translate(screenX, screenY);
+            
+            if (strokeColor) {
+                stroke(strokeColor);
+                strokeWeight(2);
+            } else {
+                noStroke();
+            }
+            
+            fill(tileColor);
+            beginShape();
+            vertex(0, -CONFIG.TILE_HEIGHT / 2);
+            vertex(CONFIG.TILE_WIDTH / 2, 0);
+            vertex(0, CONFIG.TILE_HEIGHT / 2);
+            vertex(-CONFIG.TILE_WIDTH / 2, 0);
+            endShape(CLOSE);
+            
+            pop();
+        }
+        
+        // ENHANCED CROP DRAWING WITH PNG ASSETS AND ANIMATIONS
+        function drawCrop(screenX, screenY, crop) {
+            if (!crop) return;
+            
+            const cropColor = crop.getColor();
+            const size = crop.getSize();
+            const cropX = screenX;
+            const cropY = screenY + CONFIG.TILE_HEIGHT / 4;
+            
+            push();
+            
+            // PLANT ANIMATION: Gentle sway for healthy plants
+            if (crop.health > 50) {
+                translate(cropX, cropY);
+                rotate(sin(frameCount * 0.02 + crop.x * 0.5) * 0.05); // Gentle sway
+                translate(-cropX, -cropY);
+            }
+            
+            // PLANT ANIMATION: Pulse when growing
+            let animationScale = 1.0;
+            if (frameCount % 300 < 30) { // Growth pulse every 5 seconds
+                animationScale = 1.0 + sin(frameCount * 0.3) * 0.1;
+            }
+            
+            // Try to draw PNG sprite, fallback to original graphics
+            if (crop.type === 'apple' && gameState.loadedAssets) {
+                const assetKey = `apple_stage_${crop.stage + 1}`;
+                const appleSprite = gameState.loadedAssets[assetKey];
+                
+                if (appleSprite && appleSprite.width > 0) {
+                    // Calculate sprite size based on tile size
+                    const spriteScale = (size * 2) / appleSprite.width * animationScale;
+                    const spriteWidth = appleSprite.width * spriteScale;
+                    const spriteHeight = appleSprite.height * spriteScale;
+                    
+                    // Draw sprite anchored to bottom-center
+                    image(appleSprite, 
+                          cropX - spriteWidth / 2,  // Center horizontally
+                          cropY - spriteHeight / 2,     // Center vertically
+                          spriteWidth, 
+                          spriteHeight);
+                } else {
+                    // Fallback to original placeholder graphics
+                    fill(cropColor);
+                    noStroke();
+                    const animatedSize = size * animationScale;
+                    ellipse(cropX, cropY, animatedSize, animatedSize);
+                    if (crop.stage === crop.maxStage) {
+                        fill(255, 0, 0);
+                        ellipse(cropX, cropY, animatedSize * 0.8, animatedSize * 0.8);
+                    }
+                }
+            } else if (crop.type === 'carrot') {
+                fill(cropColor);
+                noStroke();
+                const animatedSize = size * animationScale;
+                triangle(
+                    cropX, cropY - animatedSize / 2,
+                    cropX - animatedSize / 2, cropY + animatedSize / 2,
+                    cropX + animatedSize / 2, cropY + animatedSize / 2
+                );
+            } else {
+                // Default drawing for other crop types
+                fill(cropColor);
+                noStroke();
+                const animatedSize = size * animationScale;
+                ellipse(cropX, cropY, animatedSize, animatedSize);
+            }
+            
+            // STATUS INDICATORS WITH ANIMATIONS
+            textAlign(CENTER);
+            textSize(10);
+            
+            // Water meter/indicator
+            if (crop.needsWater) {
+                fill(52, 152, 219);
+                const bobOffset = sin(frameCount * 0.1) * 2;
+                text('💧', cropX + 15, cropY - 10 + bobOffset);
+            }
+            
+            // Health indicator
+            if (crop.health < 50) {
+                fill(231, 76, 60);
+                const flashAlpha = 150 + sin(frameCount * 0.2) * 105;
+                fill(231, 76, 60, flashAlpha);
+                text('😷', cropX - 15, cropY - 10);
+            }
+            
+            // Ready to harvest glow
+            if (crop.isReady) {
+                const glowIntensity = 150 + sin(frameCount * 0.15) * 105;
+                stroke(255, 255, 0, glowIntensity);
+                strokeWeight(2);
+                noFill();
+                ellipse(cropX, cropY, size + 15, size + 15);
+            }
+            
+            pop();
+            
+            // STATUS RING AROUND PLANT
+            drawStatusRing(cropX, cropY, crop, size + 20);
+        }
+        
+        // STATUS RING SYSTEM
+        function drawStatusRing(x, y, crop, ringSize) {
+            push();
+            noFill();
+            strokeWeight(2);
+            
+            let ringColor;
+            if (crop.health < 30 || crop.needsWater) {
+                ringColor = color(231, 76, 60); // Red for sick/needing care
+            } else if (crop.needsWater || crop.health < 70) {
+                ringColor = color(241, 196, 15); // Yellow for needs attention
+            } else {
+                ringColor = color(39, 174, 96); // Green for healthy
+            }
+            
+            stroke(ringColor);
+            
+            // Pulsing animation
+            const pulseScale = 1.0 + sin(frameCount * 0.1) * 0.1;
+            ellipse(x, y, ringSize * pulseScale, ringSize * pulseScale);
+            
+            pop();
+        }
+        
+        function drawTools() {
+            // Draw sprinklers
+            for (let sprinkler of gameState.placedSprinklers) {
+                const screenPos = worldToScreen(sprinkler.x, sprinkler.y);
+                fill(52, 152, 219);
+                textAlign(CENTER);
+                textSize(16);
+                text('💧', screenPos.x + 20, screenPos.y - 15);
+            }
+            
+            // Draw greenhouses
+            for (let greenhouse of gameState.placedGreenhouses) {
+                const screenPos = worldToScreen(greenhouse.x, greenhouse.y);
+                fill(39, 174, 96);
+                textAlign(CENTER);
+                textSize(16);
+                text('🏠', screenPos.x, screenPos.y - 20);
+            }
+            
+            // Draw animal helpers
+            for (let animal of gameState.animalHelpers) {
+                const screenPos = worldToScreen(animal.x, animal.y);
+                fill(241, 196, 15);
+                textAlign(CENTER);
+                textSize(14);
+                text('🐓', screenPos.x + 25, screenPos.y + 10);
+            }
+        }
+        
+        function drawGrid() {
+            for (let y = 0; y < CONFIG.GRID_HEIGHT; y++) {
+                for (let x = 0; x < CONFIG.GRID_WIDTH; x++) {
+                    const tile = gameState.grid[y][x];
+                    const screenPos = worldToScreen(x, y);
+                    
+                    let tileColor = tile.type === 'soil' ? color(139, 69, 19) : color(34, 139, 34);
+                    let strokeColor = null;
+                    
+                    if (gameState.selectedTile && 
+                        gameState.selectedTile.x === x && 
+                        gameState.selectedTile.y === y) {
+                        strokeColor = color(255, 255, 0);
+                    }
+                    
+                    drawIsometricTile(screenPos.x, screenPos.y, tileColor, strokeColor);
+                    
+                    if (tile.crop) {
+                        drawCrop(screenPos.x, screenPos.y, tile.crop);
+                    }
+                }
+            }
+            
+            drawTools();
+        }
+        
+        function drawPlantMenu() {
+            if (!gameState.showPlantMenu) return;
+            
+            push();
+            fill(44, 62, 80, 240);
+            stroke(241, 196, 15);
+            strokeWeight(2);
+            rect(gameState.plantMenuPos.x, gameState.plantMenuPos.y, 200, 120, 8);
+            
+            fill(241, 196, 15);
+            textAlign(CENTER);
+            textSize(12);
+            text("Plant Seeds", gameState.plantMenuPos.x + 100, gameState.plantMenuPos.y + 25);
+            
+            // Apple button
+            let appleButtonY = gameState.plantMenuPos.y + 45;
+            fill(gameState.appleSeeds > 0 && gameState.coins >= PRICES['apple-seeds'] ? 
+                 color(39, 174, 96) : color(127, 140, 141));
+            rect(gameState.plantMenuPos.x + 10, appleButtonY, 180, 25, 4);
+            
+            fill(255);
+            textAlign(LEFT);
+            textSize(10);
+            text(`🌰 Plant Apple (${PRICES['apple-seeds']}🪙)`, gameState.plantMenuPos.x + 15, appleButtonY + 16);
+            
+            // Carrot button
+            let carrotButtonY = gameState.plantMenuPos.y + 75;
+            fill(gameState.carrotSeeds > 0 && gameState.coins >= PRICES['carrot-seeds'] ? 
+                 color(39, 174, 96) : color(127, 140, 141));
+            rect(gameState.plantMenuPos.x + 10, carrotButtonY, 180, 25, 4);
+            
+            fill(255);
+            text(`🥕 Plant Carrot (${PRICES['carrot-seeds']}🪙)`, gameState.plantMenuPos.x + 15, carrotButtonY + 16);
+            
+            pop();
+        }
+        
+        // =============================================================================
+        // ANIMATION UTILITY FUNCTIONS
+        // =============================================================================
+        
+        // COIN COLLECTION ANIMATION
+        function addCoinAnimation(tileX, tileY, amount) {
+            const screenPos = worldToScreen(tileX, tileY);
+            const coinElement = document.createElement('div');
+            coinElement.className = 'coin-animation';
+            coinElement.textContent = `+${amount}🍃`;
+            coinElement.style.left = screenPos.x + 'px';
+            coinElement.style.top = screenPos.y + 'px';
+            coinElement.style.position = 'fixed';
+            document.body.appendChild(coinElement);
+            
+            setTimeout(() => {
+                if (coinElement.parentNode) {
+                    coinElement.parentNode.removeChild(coinElement);
+                }
+            }, 1000);
+        }
+        
+        // WATER ANIMATION
+        function addWaterAnimation(tileX, tileY) {
+            const screenPos = worldToScreen(tileX, tileY);
+            
+            // Create multiple water droplets
+            for (let i = 0; i < 5; i++) {
+                const dropElement = document.createElement('div');
+                dropElement.className = 'water-effect';
+                dropElement.textContent = '💧';
+                dropElement.style.left = (screenPos.x + (i - 2) * 8) + 'px';
+                dropElement.style.top = (screenPos.y - 20) + 'px';
+                dropElement.style.position = 'fixed';
+                document.body.appendChild(dropElement);
+                
+                setTimeout(() => {
+                    if (dropElement.parentNode) {
+                        dropElement.parentNode.removeChild(dropElement);
+                    }
+                }, 1000);
+            }
+        }
+        
+        // WEATHER EFFECTS
+        function createWeatherEffects(weatherCondition) {
+            const overlay = document.getElementById('weather-overlay');
+            overlay.innerHTML = ''; // Clear existing effects
+            
+            switch(weatherCondition) {
+                case 'Rainy':
+                    createRainEffect(overlay);
+                    break;
+                case 'Snowy':
+                    createSnowEffect(overlay);
+                    break;
+                case 'Sunny':
+                    createSunbeamEffect(overlay);
+                    break;
+                default:
+                    // Clear effects for other weather
+                    break;
+            }
+        }
+        
+        function createRainEffect(overlay) {
+            for (let i = 0; i < 50; i++) {
+                const drop = document.createElement('div');
+                drop.className = 'rain-drop';
+                drop.style.left = Math.random() * 100 + '%';
+                drop.style.animationDelay = Math.random() * 2 + 's';
+                drop.style.animationDuration = (Math.random() * 0.5 + 0.5) + 's';
+                overlay.appendChild(drop);
+            }
+        }
+        
+        function createSnowEffect(overlay) {
+            for (let i = 0; i < 30; i++) {
+                const flake = document.createElement('div');
+                flake.className = 'snow-flake';
+                flake.textContent = '❄';
+                flake.style.left = Math.random() * 100 + '%';
+                flake.style.animationDelay = Math.random() * 3 + 's';
+                flake.style.animationDuration = (Math.random() * 2 + 3) + 's';
+                overlay.appendChild(flake);
+            }
+        }
+        
+        function createSunbeamEffect(overlay) {
+            for (let i = 0; i < 3; i++) {
+                const beam = document.createElement('div');
+                beam.className = 'sunbeam';
+                beam.style.left = Math.random() * 80 + 10 + '%';
+                beam.style.top = Math.random() * 80 + 10 + '%';
+                beam.style.animationDelay = Math.random() * 2 + 's';
+                overlay.appendChild(beam);
+            }
+        }
+        
+        // PURCHASE NOTIFICATION
+        function showPurchaseNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'purchase-notification';
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 2000);
+        }
+
+        // =============================================================================
+        // UI UPDATE FUNCTIONS
+        // =============================================================================
+        
+        function updateAllUI() {
+            updateResourcesUI();
+            updateInventoryUI();
+            updateTopBarUI();
+            updatePlantStatusUI();
+            updateNarrativeUI();
+            updateWeatherUI();
+        }
+        
+        function updateResourcesUI() {
+            document.getElementById('coins').textContent = gameState.coins;
+            document.getElementById('apple-seeds').textContent = gameState.appleSeeds;
+            document.getElementById('carrot-seeds').textContent = gameState.carrotSeeds;
+            document.getElementById('harvested').textContent = gameState.harvested;
+            document.getElementById('farm-level').textContent = gameState.farmLevel;
+        }
+        
+        // ENHANCED INVENTORY UPDATE
+        function updateInventoryUI() {
+            // Old panel updates
+            if (document.getElementById('watering-cans')) {
+                document.getElementById('watering-cans').textContent = gameState.wateringCans;
+            }
+            if (document.getElementById('sprinklers')) {
+                document.getElementById('sprinklers').textContent = gameState.sprinklers;
+            }
+            if (document.getElementById('greenhouses')) {
+                document.getElementById('greenhouses').textContent = gameState.greenhouses;
+            }
+            if (document.getElementById('animals')) {
+                document.getElementById('animals').textContent = gameState.animals;
+            }
+            
+            // Enhanced inventory panel updates
+            if (document.getElementById('inv-apple-seeds')) {
+                document.getElementById('inv-apple-seeds').textContent = gameState.appleSeeds;
+            }
+            if (document.getElementById('inv-carrot-seeds')) {
+                document.getElementById('inv-carrot-seeds').textContent = gameState.carrotSeeds;
+            }
+            if (document.getElementById('inv-watering-cans')) {
+                document.getElementById('inv-watering-cans').textContent = gameState.wateringCans;
+            }
+            if (document.getElementById('inv-sprinklers')) {
+                document.getElementById('inv-sprinklers').textContent = gameState.sprinklers;
+            }
+            if (document.getElementById('inv-greenhouses')) {
+                document.getElementById('inv-greenhouses').textContent = gameState.greenhouses;
+            }
+            if (document.getElementById('inv-animals')) {
+                document.getElementById('inv-animals').textContent = gameState.animals;
+            }
+            if (document.getElementById('inv-harvested-apples')) {
+                document.getElementById('inv-harvested-apples').textContent = gameState.harvestedApples || 0;
+            }
+            if (document.getElementById('inv-harvested-carrots')) {
+                document.getElementById('inv-harvested-carrots').textContent = gameState.harvestedCarrots || 0;
+            }
+        }
+        
+        // TOP BAR UI UPDATE
+        function updateTopBarUI() {
+            if (document.getElementById('top-coin-count')) {
+                document.getElementById('top-coin-count').textContent = gameState.coins;
+            }
+            if (document.getElementById('top-weather-icon')) {
+                document.getElementById('top-weather-icon').textContent = gameState.weather.icon;
+            }
+            if (document.getElementById('top-weather-condition')) {
+                document.getElementById('top-weather-condition').textContent = gameState.weather.condition;
+            }
+            if (document.getElementById('xp-level')) {
+                document.getElementById('xp-level').textContent = `Lv.${gameState.farmLevel}`;
+            }
+            
+            // XP bar animation
+            const xpProgress = (gameState.harvested % 10) * 10; // Level up every 10 harvests
+            if (document.getElementById('xp-fill')) {
+                document.getElementById('xp-fill').style.width = xpProgress + '%';
+            }
+        }
+        
+        function updateWeatherUI() {
+            if (document.getElementById('weather-icon')) {
+                document.getElementById('weather-icon').textContent = gameState.weather.icon;
+            }
+            if (document.getElementById('weather-condition')) {
+                document.getElementById('weather-condition').textContent = gameState.weather.condition;
+            }
+            if (document.getElementById('temperature')) {
+                document.getElementById('temperature').textContent = gameState.weather.temperature + '°C';
+            }
+            if (document.getElementById('humidity')) {
+                document.getElementById('humidity').textContent = gameState.weather.humidity + '%';
+            }
+            if (document.getElementById('pollution')) {
+                document.getElementById('pollution').textContent = gameState.weather.pollution;
+            }
+            if (document.getElementById('soil-quality')) {
+                document.getElementById('soil-quality').textContent = gameState.weather.soilQuality;
+            }
+            
+            // Update weather effects
+            createWeatherEffects(gameState.weather.condition);
+        }
+        
+        function updatePlantStatusUI() {
+            const plantList = document.getElementById('plant-status-list');
+            plantList.innerHTML = '';
+            
+            let cropCount = 0;
+            for (let y = 0; y < CONFIG.GRID_HEIGHT; y++) {
+                for (let x = 0; x < CONFIG.GRID_WIDTH; x++) {
+                    const tile = gameState.grid[y][x];
+                    if (tile.crop) {
+                        cropCount++;
+                        const item = document.createElement('div');
+                        item.className = 'plant-status-item';
+                        
+                        const icons = tile.crop.getStatusIcons();
+                        const iconHTML = icons.map(icon => 
+                            `<span class="status-icon ${icon.class}">${icon.icon}</span>`
+                        ).join('');
+                        
+                        item.innerHTML = `
+                            <span>${tile.crop.type} (${x},${y}) - Stage ${tile.crop.stage + 1}</span>
+                            <div class="plant-icons">${iconHTML}</div>
+                        `;
+                        plantList.appendChild(item);
+                    }
+                }
+            }
+            
+            if (cropCount === 0) {
+                plantList.innerHTML = '<div style="text-align: center; color: #95a5a6; font-size: 8px;">No crops planted yet</div>';
+            }
+        }
+        
+        function updateNarrativeUI() {
+            const now = Date.now();
+            if (now - gameState.lastNarrativeUpdate > 20000) { // Every 20 seconds
+                const message = NARRATIVE_MESSAGES[Math.floor(Math.random() * NARRATIVE_MESSAGES.length)];
+                document.getElementById('narrative-text').textContent = `"${message}"`;
+                gameState.lastNarrativeUpdate = now;
+            }
+        }
+        
+        // =============================================================================
+        // INPUT HANDLING
+        // =============================================================================
+        
+        function mousePressed() {
+            if (!gameState.gameStarted) return;
+            
+            const worldPos = screenToWorld(mouseX, mouseY);
+            
+            // Handle plant menu
+            if (gameState.showPlantMenu) {
+                const menuX = gameState.plantMenuPos.x;
+                const menuY = gameState.plantMenuPos.y;
+                
+                if (mouseX >= menuX && mouseX <= menuX + 200 && 
+                    mouseY >= menuY && mouseY <= menuY + 120) {
+                    
+                    if (mouseY >= menuY + 45 && mouseY <= menuY + 70) {
+                        if (gameState.selectedTile) {
+                            const tile = gameState.grid[gameState.selectedTile.y][gameState.selectedTile.x];
+                            tile.plantCrop('apple');
+                        }
+                        gameState.showPlantMenu = false;
+                        return;
+                    }
+                    
+                    if (mouseY >= menuY + 75 && mouseY <= menuY + 100) {
+                        if (gameState.selectedTile) {
+                            const tile = gameState.grid[gameState.selectedTile.y][gameState.selectedTile.x];
+                            tile.plantCrop('carrot');
+                        }
+                        gameState.showPlantMenu = false;
+                        return;
+                    }
+                } else {
+                    gameState.showPlantMenu = false;
+                    return;
+                }
+            }
+            
+            // Handle tile interaction
+            if (isValidTile(worldPos.x, worldPos.y)) {
+                const tile = gameState.grid[worldPos.y][worldPos.x];
+                gameState.selectedTile = { x: worldPos.x, y: worldPos.y };
+                
+                // NEW: Tool usage system
+                if (gameState.selectedTool && tile.crop) {
+                    if (useTool(tile)) {
+                        showPurchaseNotification(`✅ Used ${gameState.selectedTool.replace('_', ' ')}!`);
+                    } else {
+                        showPurchaseNotification(`❌ Cannot use ${gameState.selectedTool.replace('_', ' ')} here!`);
+                    }
+                    return;
+                }
+                
+                if (mouseButton === RIGHT) {
+                    if (tile.crop && tile.crop.isReady) {
+                        tile.harvestCrop();
+                    } else if (tile.crop && tile.crop.needsWater) {
+                        tile.crop.water();
+                        addWaterAnimation(worldPos.x, worldPos.y);
+                        showPurchaseNotification('Crop watered! 💧');
+                    }
+                } else {
+                    if (tile.crop && tile.crop.isReady) {
+                        tile.harvestCrop();
+                    } else if (!tile.crop) {
+                        gameState.showPlantMenu = true;
+                        gameState.plantMenuPos = { x: mouseX + 10, y: mouseY - 60 };
+                        
+                        if (gameState.plantMenuPos.x + 200 > width) {
+                            gameState.plantMenuPos.x = width - 210;
+                        }
+                        if (gameState.plantMenuPos.y < 0) {
+                            gameState.plantMenuPos.y = 10;
+                        }
+                    }
+                }
+            }
+        }
+        
+        function keyPressed() {
+            if (!gameState.gameStarted) return;
+            
+            if (key === ' ') {
+                // Water all crops with animations
+                let wateredCount = 0;
+                for (let y = 0; y < CONFIG.GRID_HEIGHT; y++) {
+                    for (let x = 0; x < CONFIG.GRID_WIDTH; x++) {
+                        const tile = gameState.grid[y][x];
+                        if (tile.crop && tile.crop.needsWater) {
+                            tile.crop.water();
+                            // Add water animation
+                            addWaterAnimation(x, y);
+                            wateredCount++;
+                        }
+                    }
+                }
+                if (wateredCount > 0) {
+                    showPurchaseNotification(`💧 Watered ${wateredCount} crops!`);
+                }
+            }
+            
+            // NEW: Debug mode toggle (press D)
+            if (key === 'd' || key === 'D') {
+                CONFIG.DEBUG_MODE = !CONFIG.DEBUG_MODE;
+                showPurchaseNotification(`🐛 Debug mode ${CONFIG.DEBUG_MODE ? 'ON' : 'OFF'}`);
+                console.log(`Debug mode: ${CONFIG.DEBUG_MODE}`);
+            }
+            
+            // NEW: Add test pesticide (press P)
+            if ((key === 'p' || key === 'P') && CONFIG.DEBUG_MODE) {
+                gameState.tools.pesticide += 5;
+                updateToolUI();
+                showPurchaseNotification(`🧪 Added 5 pesticide for testing!`);
+            }
+            
+            // NEW: Add test solar lamps (press L)  
+            if ((key === 'l' || key === 'L') && CONFIG.DEBUG_MODE) {
+                gameState.tools.solar_lamp += 3;
+                updateToolUI();
+                showPurchaseNotification(`💡 Added 3 solar lamps for testing!`);
+            }
+        }
+        
+        // =============================================================================
+        // SHOP SYSTEM
+        // =============================================================================
+        
+        // ENHANCED SHOP SYSTEM WITH ANIMATIONS
+        function buyItem(itemType, cost, amount) {
+            // Check if player has enough coins
+            if (gameState.coins >= cost) {
+                // Deduct coins with animation
+                gameState.coins -= cost;
+                
+                let itemName = '';
+                let icon = '';
+                
+                switch(itemType) {
+                    case 'apple-seeds':
+                        gameState.appleSeeds += amount;
+                        itemName = `Apple Seeds x${amount}`;
+                        icon = '🌰';
+                        break;
+                    case 'carrot-seeds':
+                        gameState.carrotSeeds += amount;
+                        itemName = `Carrot Seeds x${amount}`;
+                        icon = '🥕';
+                        break;
+                    case 'sprinkler':
+                        gameState.sprinklers += amount;
+                        itemName = `Sprinkler x${amount}`;
+                        icon = '💧';
+                        break;
+                    case 'greenhouse':
+                        gameState.greenhouses += amount;
+                        itemName = `Greenhouse x${amount}`;
+                        icon = '🏠';
+                        break;
+                    case 'animal':
+                        gameState.animals += amount;
+                        itemName = `Chicken Helper x${amount}`;
+                        icon = '🐓';
+                        // Place animal randomly
+                        const x = Math.floor(Math.random() * CONFIG.GRID_WIDTH);
+                        const y = Math.floor(Math.random() * CONFIG.GRID_HEIGHT);
+                        gameState.animalHelpers.push({ x, y });
+                        break;
+                }
+                
+                // Update UI immediately
+                updateAllUI();
+                
+                // Show purchase notification with animation
+                showPurchaseNotification(`${icon} ${itemName} Purchased!`);
+                
+                // Update shop button states
+                updateShopButtons();
+                
+                console.log(`✅ Purchased: ${itemName} for ${cost} coins`);
+            } else {
+                // Not enough coins - show error
+                showPurchaseNotification(`❌ Need ${cost - gameState.coins} more coins!`);
+                
+                // Shake effect on buttons (visual feedback)
+                const buttons = document.querySelectorAll('.shop-button');
+                buttons.forEach(button => {
+                    button.style.animation = 'none';
+                    setTimeout(() => {
+                        button.style.animation = 'shake 0.5s ease-in-out';
+                    }, 10);
+                });
+                
+                console.log(`❌ Purchase failed: ${itemType} costs ${cost}, have ${gameState.coins} coins`);
+            }
+        }
+        
+        // UPDATE SHOP BUTTON STATES
+        function updateShopButtons() {
+            const buttons = document.querySelectorAll('.shop-button');
+            buttons.forEach(button => {
+                const onclick = button.getAttribute('onclick');
+                if (onclick) {
+                    // Extract cost from onclick (e.g. "buyItem('apple-seeds', 15, 3)")
+                    const match = onclick.match(/buyItem\('([^']+)', (\d+), \d+\)/);
+                    if (match) {
+                        const cost = parseInt(match[2]);
+                        if (gameState.coins < cost) {
+                            button.disabled = true;
+                            button.style.opacity = '0.5';
+                        } else {
+                            button.disabled = false;
+                            button.style.opacity = '1';
+                        }
+                    }
+                }
+            });
+        }
+        
+        // =============================================================================
+        // NEW: UI UPDATE FUNCTIONS
+        // =============================================================================
+        
+        // Update tool UI to show selection and counts
+        function updateToolUI() {
+            // Update tool counts
+            document.getElementById('tool-watering-count').textContent = gameState.tools.watering_can;
+            document.getElementById('tool-pesticide-count').textContent = gameState.tools.pesticide;
+            document.getElementById('tool-solar-count').textContent = gameState.tools.solar_lamp;
+            
+            // Update selected tool display
+            const selectedDisplay = document.getElementById('selected-tool-display');
+            selectedDisplay.textContent = gameState.selectedTool ? 
+                gameState.selectedTool.replace('_', ' ').toLowerCase() : 'None';
+            
+            // Update button states
+            const buttons = document.querySelectorAll('.tool-button');
+            buttons.forEach(button => {
+                const toolType = button.id.replace('tool-', '').replace('-', '_');
+                
+                // Remove selected class from all buttons
+                button.classList.remove('selected');
+                
+                // Add selected class to current tool
+                if (gameState.selectedTool === toolType) {
+                    button.classList.add('selected');
+                }
+                
+                // Disable button if no tools available
+                if (gameState.tools[toolType] <= 0) {
+                    button.disabled = true;
+                } else {
+                    button.disabled = false;
+                }
+            });
+        }
+        
+        // =============================================================================
+        // NOTIFICATIONS
+        // =============================================================================
+        
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 3000);
+        }
+        
+        // =============================================================================
+        // INTRO SYSTEM
+        // =============================================================================
+        
+        function showIntroPopup2() {
+            document.getElementById('intro-popup-1').style.display = 'none';
+            document.getElementById('intro-popup-2').style.display = 'flex';
+        }
+        
+        function startGame() {
+            document.getElementById('intro-popup-2').style.display = 'none';
+            gameState.gameStarted = true;
+            
+            // NEW: Initialize enhanced weather system
+            updateEnhancedWeather();
+            setInterval(updateEnhancedWeather, 60000); // Update weather every minute
+            
+            // Initialize enhancement features
+            updateShopButtons();
+            createWeatherEffects(gameState.weather.condition);
+            
+            showPurchaseNotification('🌱 Welcome to your new farm!');
+            
+            // NEW: Show debug mode status
+            if (CONFIG.DEBUG_MODE) {
+                showPurchaseNotification('🐛 Debug mode enabled!');
+            }
+        }
+        
+        // =============================================================================
+        // INITIALIZATION
+        // =============================================================================
+        
+        function initializeGrid() {
+            gameState.grid = [];
+            for (let y = 0; y < CONFIG.GRID_HEIGHT; y++) {
+                gameState.grid[y] = [];
+                for (let x = 0; x < CONFIG.GRID_WIDTH; x++) {
+                    gameState.grid[y][x] = new Tile(x, y);
+                }
+            }
+        }
+        
+        // =============================================================================
+        // ENHANCED DRAWING SYSTEM
+        // =============================================================================
+        
+        // NEW: Main grid drawing function with enhanced visuals
+        function drawGrid() {
+            // Draw tiles row by row for proper isometric layering
+            for (let y = 0; y < CONFIG.GRID_HEIGHT; y++) {
+                for (let x = 0; x < CONFIG.GRID_WIDTH; x++) {
+                    const tile = gameState.grid[y][x];
+                    const screenPos = worldToScreen(x, y);
+                    
+                    // Draw tile base
+                    drawTile(screenPos.x, screenPos.y, tile);
+                    
+                    // Draw crop if exists with enhanced status system
+                    if (tile.crop) {
+                        drawCropWithStatus(screenPos.x, screenPos.y, tile.crop);
+                    }
+                    
+                    // Draw tool cursor if tool is selected
+                    drawToolCursor(screenPos.x, screenPos.y, tile);
+                }
+            }
+            
+            // Draw selected tile highlight
+            if (gameState.selectedTile) {
+                drawTileSelection();
+            }
+        }
+        
+        // NEW: Enhanced tile drawing
+        function drawTile(screenX, screenY, tile) {
+            push();
+            
+            // Tile base color based on type
+            let tileColor = color(144, 238, 144); // Light green for grass
+            if (tile.type === 'soil') {
+                tileColor = color(139, 69, 19); // Brown for soil
+            }
+            
+            // Draw diamond-shaped isometric tile
+            fill(tileColor);
+            stroke(100);
+            strokeWeight(1);
+            
+            // Isometric diamond
+            beginShape();
+            vertex(screenX, screenY - CONFIG.TILE_HEIGHT / 2);
+            vertex(screenX + CONFIG.TILE_WIDTH / 2, screenY);
+            vertex(screenX, screenY + CONFIG.TILE_HEIGHT / 2);
+            vertex(screenX - CONFIG.TILE_WIDTH / 2, screenY);
+            endShape(CLOSE);
+            
+            pop();
+        }
+        
+        // NEW: Enhanced crop drawing with status system
+        function drawCropWithStatus(screenX, screenY, crop) {
+            if (!crop) return;
+            
+            const cropColor = crop.getColor();
+            const size = crop.getSize();
+            const cropX = screenX;
+            const cropY = screenY + CONFIG.TILE_HEIGHT / 4;
+            
+            push();
+            
+            // NEW: Apply plant tinting based on health status
+            let tintAlpha = 255;
+            switch(crop.tintColor) {
+                case 'healthy': 
+                    tint(100, 255, 100, tintAlpha); 
+                    break;
+                case 'attention': 
+                    tint(255, 255, 100, tintAlpha); 
+                    break;
+                case 'sick': 
+                    tint(255, 100, 100, tintAlpha); 
+                    break;
+                default: 
+                    tint(255, 255, 255, tintAlpha); 
+                    break;
+            }
+            
+            // PLANT ANIMATION: Gentle sway for healthy plants
+            if (crop.health > 50) {
+                translate(cropX, cropY);
+                rotate(sin(frameCount * 0.02 + crop.x * 0.5) * 0.05); // Gentle sway
+                translate(-cropX, -cropY);
+            }
+            
+            // PLANT ANIMATION: Pulse when growing
+            let animationScale = 1.0;
+            if (frameCount % 300 < 30) { // Growth pulse every 5 seconds
+                animationScale = 1.0 + sin(frameCount * 0.3) * 0.1;
+            }
+            
+            // Try to draw PNG sprite, fallback to original graphics
+            if (crop.type === 'apple' && gameState.loadedAssets) {
+                const assetKey = `apple_stage_${crop.stage + 1}`;
+                const appleSprite = gameState.loadedAssets[assetKey];
+                
+                // DEBUG: Log which stage is being drawn
+                if (CONFIG.DEBUG_MODE && frameCount % 120 === 0) { // Log every 2 seconds
+                    console.log(`🎨 DRAWING ${crop.type}(${crop.x},${crop.y}): stage=${crop.stage}, assetKey=${assetKey}, spriteExists=${!!appleSprite}, spriteValid=${!!(appleSprite && appleSprite.width > 0)}`);
+                }
+                
+                if (appleSprite && appleSprite.width > 0) {
+                    // Calculate sprite size based on tile size
+                    const spriteScale = (size * 2) / appleSprite.width * animationScale;
+                    const spriteWidth = appleSprite.width * spriteScale;
+                    const spriteHeight = appleSprite.height * spriteScale;
+                    
+                    // Draw sprite anchored to bottom-center
+                    image(appleSprite, 
+                          cropX - spriteWidth / 2,  // Center horizontally
+                          cropY - spriteHeight / 2,     // Center vertically
+                          spriteWidth, 
+                          spriteHeight);
+                } else {
+                    // Fallback to original placeholder graphics
+                    noTint();
+                    fill(cropColor);
+                    noStroke();
+                    const animatedSize = size * animationScale;
+                    ellipse(cropX, cropY, animatedSize, animatedSize);
+                    if (crop.stage === crop.maxStage) {
+                        fill(255, 0, 0);
+                        ellipse(cropX, cropY, animatedSize * 0.8, animatedSize * 0.8);
+                    }
+                }
+            } else if (crop.type === 'carrot') {
+                noTint();
+                fill(cropColor);
+                noStroke();
+                const animatedSize = size * animationScale;
+                triangle(
+                    cropX, cropY - animatedSize / 2,
+                    cropX - animatedSize / 2, cropY + animatedSize / 2,
+                    cropX + animatedSize / 2, cropY + animatedSize / 2
+                );
+            } else {
+                // Default drawing for other crop types
+                noTint();
+                fill(cropColor);
+                noStroke();
+                const animatedSize = size * animationScale;
+                ellipse(cropX, cropY, animatedSize, animatedSize);
+            }
+            
+            pop();
+            
+            // NEW: Draw floating status emoji with animation
+            if (crop.statusEmoji) {
+                drawFloatingEmoji(cropX, cropY - 40, crop.statusEmoji);
+            }
+            
+            // NEW: Draw status ring around plant
+            if (CONFIG.DEBUG_MODE || crop.tintColor !== 'healthy') {
+                drawStatusRing(cropX, cropY, crop, size + 20);
+            }
+        }
+        
+        // NEW: Floating emoji animation
+        function drawFloatingEmoji(x, y, emoji) {
+            push();
+            
+            // Gentle bounce animation
+            const bounce = sin(frameCount * 0.1) * 3;
+            
+            fill(255);
+            textAlign(CENTER);
+            textSize(16);
+            text(emoji, x, y + bounce);
+            
+            pop();
+        }
+        
+        // NEW: Status ring system
+        function drawStatusRing(x, y, crop, ringSize) {
+            push();
+            noFill();
+            strokeWeight(2);
+            
+            let ringColor;
+            if (crop.tintColor === 'healthy') {
+                ringColor = color(39, 174, 96, 150); // Green
+            } else if (crop.tintColor === 'attention') {
+                ringColor = color(243, 156, 18, 150); // Yellow
+            } else if (crop.tintColor === 'sick') {
+                ringColor = color(231, 76, 60, 150); // Red
+            } else {
+                ringColor = color(127, 140, 141, 150); // Gray
+            }
+            
+            stroke(ringColor);
+            
+            // Pulsing animation
+            const pulse = 1 + sin(frameCount * 0.1) * 0.1;
+            ellipse(x, y, ringSize * pulse, ringSize * pulse);
+            
+            pop();
+        }
+        
+        // NEW: Tool cursor system
+        function drawToolCursor(screenX, screenY, tile) {
+            if (!gameState.selectedTool) return;
+            
+            // Check if mouse is over this tile
+            const worldPos = screenToWorld(mouseX, mouseY);
+            if (Math.floor(worldPos.x) === tile.x && Math.floor(worldPos.y) === tile.y) {
+                push();
+                
+                // Change cursor appearance based on tool
+                let cursorEmoji = '🔧';
+                let canUse = false;
+                
+                switch(gameState.selectedTool) {
+                    case 'watering_can':
+                        cursorEmoji = '🪣';
+                        canUse = tile.crop && tile.crop.needsWater;
+                        break;
+                    case 'pesticide':
+                        cursorEmoji = '🧪';
+                        canUse = tile.crop && tile.crop.hasPests;
+                        break;
+                    case 'solar_lamp':
+                        cursorEmoji = '💡';
+                        canUse = tile.crop && tile.crop.sunlightLevel < 70;
+                        break;
+                }
+                
+                // Draw tool cursor with availability indicator
+                fill(canUse ? color(100, 255, 100, 180) : color(255, 100, 100, 180));
+                ellipse(screenX, screenY, 50, 25);
+                
+                fill(255);
+                textAlign(CENTER);
+                textSize(20);
+                text(cursorEmoji, screenX, screenY + 5);
+                
+                pop();
+            }
+        }
+        
+        // NEW: Selected tile highlight
+        function drawTileSelection() {
+            if (!gameState.selectedTile) return;
+            
+            const screenPos = worldToScreen(gameState.selectedTile.x, gameState.selectedTile.y);
+            
+            push();
+            noFill();
+            stroke(255, 255, 0);
+            strokeWeight(3);
+            
+            // Pulsing selection highlight
+            const pulse = 1 + sin(frameCount * 0.2) * 0.2;
+            
+            beginShape();
+            vertex(screenPos.x, screenPos.y - CONFIG.TILE_HEIGHT / 2 * pulse);
+            vertex(screenPos.x + CONFIG.TILE_WIDTH / 2 * pulse, screenPos.y);
+            vertex(screenPos.x, screenPos.y + CONFIG.TILE_HEIGHT / 2 * pulse);
+            vertex(screenPos.x - CONFIG.TILE_WIDTH / 2 * pulse, screenPos.y);
+            endShape(CLOSE);
+            
+            pop();
+        }
+        
+        // =============================================================================
+        // NEW: TOOL SELECTION SYSTEM
+        // =============================================================================
+        
+        // Handle tool selection from UI
+        function selectTool(toolType) {
+            if (gameState.tools[toolType] > 0) {
+                gameState.selectedTool = gameState.selectedTool === toolType ? null : toolType;
+                console.log(`Selected tool: ${gameState.selectedTool}`);
+                updateToolUI();
+            } else {
+                showPurchaseNotification(`❌ No ${toolType.replace('_', ' ')} available!`);
+            }
+        }
+        
+        // Use tool on tile
+        function useTool(tile) {
+            if (!gameState.selectedTool || !tile.crop) return false;
+            
+            const toolConfig = CONFIG.TOOL_EFFECTS[gameState.selectedTool];
+            if (!toolConfig) return false;
+            
+            // Check cost
+            if (gameState.coins < toolConfig.cost) {
+                showPurchaseNotification(`❌ Need ${toolConfig.cost} coins!`);
+                return false;
+            }
+            
+            // Use tool on crop
+            const success = tile.crop.useTool(gameState.selectedTool);
+            
+            if (success) {
+                // Deduct cost
+                gameState.coins -= toolConfig.cost;
+                
+                // Add visual feedback
+                addToolAnimation(tile.x, tile.y, gameState.selectedTool);
+                
+                // Update UI
+                updateAllUI();
+                
+                console.log(`Used ${gameState.selectedTool} on crop at (${tile.x}, ${tile.y})`);
+                return true;
+            }
+            
+            return false;
+        }
+        
+        // NEW: Tool animation effects
+        function addToolAnimation(tileX, tileY, toolType) {
+            const screenPos = worldToScreen(tileX, tileY);
+            
+            // Create animation element
+            const animElement = document.createElement('div');
+            animElement.style.position = 'fixed';
+            animElement.style.left = screenPos.x + 'px';
+            animElement.style.top = screenPos.y + 'px';
+            animElement.style.fontSize = '24px';
+            animElement.style.pointerEvents = 'none';
+            animElement.style.zIndex = '1000';
+            
+            switch(toolType) {
+                case 'watering_can':
+                    animElement.textContent = '💧';
+                    animElement.style.animation = 'waterDrop 1s ease-out forwards';
+                    break;
+                case 'pesticide':
+                    animElement.textContent = '✨';
+                    animElement.style.animation = 'sparkle 1s ease-out forwards';
+                    break;
+                case 'solar_lamp':
+                    animElement.textContent = '☀️';
+                    animElement.style.animation = 'sunbeamPulse 1s ease-out forwards';
+                    break;
+            }
+            
+            document.body.appendChild(animElement);
+            
+            setTimeout(() => {
+                if (animElement.parentNode) {
+                    animElement.parentNode.removeChild(animElement);
+                }
+            }, 1000);
+        }
+        
+        // =============================================================================
+        // ENHANCED WEATHER SYSTEM
+        // =============================================================================
+        
+        // NEW: Update weather with enhanced API integration
+        async function updateEnhancedWeather() {
+            const now = Date.now();
+            
+            // Only update from API every 5 minutes
+            if (now - gameState.weather.lastApiUpdate < CONFIG.WEATHER_UPDATE_INTERVAL) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=San Francisco&appid=${CONFIG.WEATHER_API_KEY}&units=metric`);
+                const data = await response.json();
+                
+                // Enhanced weather mapping
+                const weatherMap = {
+                    'clear sky': { condition: 'Sunny', icon: '☀️' },
+                    'few clouds': { condition: 'Sunny', icon: '⛅' },
+                    'scattered clouds': { condition: 'Cloudy', icon: '☁️' },
+                    'broken clouds': { condition: 'Cloudy', icon: '☁️' },
+                    'overcast clouds': { condition: 'Cloudy', icon: '☁️' },
+                    'shower rain': { condition: 'Rain', icon: '🌧️' },
+                    'rain': { condition: 'Rain', icon: '🌧️' },
+                    'thunderstorm': { condition: 'Rain', icon: '⛈️' },
+                    'snow': { condition: 'Snow', icon: '❄️' },
+                    'mist': { condition: 'Cloudy', icon: '🌫️' }
+                };
+                
+                const weather = weatherMap[data.weather[0].description] || { condition: 'Sunny', icon: '☀️' };
+                
+                gameState.weather = {
+                    condition: weather.condition,
+                    temperature: Math.round(data.main.temp),
+                    humidity: data.main.humidity,
+                    pollution: Math.random() > 0.7 ? 'High' : 'Low',
+                    soilQuality: 'Rich',
+                    icon: weather.icon,
+                    lastApiUpdate: now
+                };
+                
+                console.log('🌤️ Weather updated from API:', gameState.weather);
+                showPurchaseNotification(`🌤️ Weather: ${weather.condition} ${weather.icon}`);
+                
+            } catch (error) {
+                console.log('⚠️ Weather API failed, using simulation:', error);
+                simulateEnhancedWeather();
+            }
+            
+            // Update all UI elements
+            updateWeatherUI();
+            createWeatherEffects(gameState.weather.condition);
+        }
+        
+        // NEW: Enhanced weather simulation
+        function simulateEnhancedWeather() {
+            const conditions = [
+                { condition: 'Sunny', icon: '☀️' },
+                { condition: 'Cloudy', icon: '☁️' },
+                { condition: 'Rain', icon: '🌧️' },
+                { condition: 'Snow', icon: '❄️' }
+            ];
+            
+            const weather = conditions[Math.floor(Math.random() * conditions.length)];
+            gameState.weather = {
+                ...weather,
+                temperature: Math.floor(Math.random() * 20) + 15,
+                humidity: Math.floor(Math.random() * 40) + 40,
+                pollution: Math.random() > 0.8 ? 'High' : 'Low',
+                soilQuality: 'Rich',
+                lastApiUpdate: Date.now()
+            };
+            
+            console.log('🌤️ Simulated weather:', gameState.weather);
+        }
+        
+        // =============================================================================
+        // P5.JS MAIN FUNCTIONS
+        // =============================================================================
+        
+        function preload() {
+            console.log('✅ P5.js Isometric Farm MVP Loading...');
+            
+            // Initialize assets objects
+            gameState.loadedAssets = {};
+            gameState.toolAssets = {};
+            gameState.weatherAssets = {};
+            
+            // Load Apple Tree PNG assets
+            try {
+                gameState.loadedAssets.apple_stage_1 = loadImage('assets/apple/apple_stage_01.png', 
+                    () => console.log('✅ Loaded apple_stage_01.png'),
+                    () => console.log('⚠️ Failed to load apple_stage_01.png - using fallback graphics')
+                );
+                gameState.loadedAssets.apple_stage_2 = loadImage('assets/apple/apple_stage_02.png',
+                    () => console.log('✅ Loaded apple_stage_02.png'),
+                    () => console.log('⚠️ Failed to load apple_stage_02.png - using fallback graphics')
+                );
+                gameState.loadedAssets.apple_stage_3 = loadImage('assets/apple/apple_stage_03.png',
+                    () => console.log('✅ Loaded apple_stage_03.png'),
+                    () => console.log('⚠️ Failed to load apple_stage_03.png - using fallback graphics')
+                );
+                gameState.loadedAssets.apple_stage_4 = loadImage('assets/apple/apple_stage_04.png',
+                    () => console.log('✅ Loaded apple_stage_04.png'),
+                    () => console.log('⚠️ Failed to load apple_stage_04.png - using fallback graphics')
+                );
+                gameState.loadedAssets.apple_stage_5 = loadImage('assets/apple/apple_stage_05.png',
+                    () => console.log('✅ Loaded apple_stage_05.png'),
+                    () => console.log('⚠️ Failed to load apple_stage_05.png - using fallback graphics')
+                );
+                console.log('🍎 Attempting to load apple tree PNG assets...');
+            } catch (error) {
+                console.log('⚠️ Apple PNG asset loading failed, using fallback graphics:', error);
+            }
+            
+            // NEW: Load Tool Assets (with fallback handling)
+            try {
+                console.log('🧰 Loading tool assets...');
+                // For now, we'll create placeholder assets if they don't exist
+                // Users can replace these with actual PNGs later
+            } catch (error) {
+                console.log('⚠️ Tool asset loading failed, using fallback graphics:', error);
+            }
+            
+            // NEW: Load Weather Icons (with fallback handling)
+            try {
+                console.log('🌤️ Loading weather assets...');
+                // For now, we'll use emoji fallbacks
+                // Users can replace these with actual PNGs later
+            } catch (error) {
+                console.log('⚠️ Weather asset loading failed, using fallback graphics:', error);
+            }
+        }
+        
+        function setup() {
+            const canvas = createCanvas(CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT);
+            canvas.parent('game-container');
+            
+            // Ensure assets object exists even if preload failed
+            if (!gameState.loadedAssets) {
+                gameState.loadedAssets = {};
+                console.log('⚠️ Assets not loaded, using fallback graphics');
+            }
+            
+            initializeGrid();
+            updateAllUI();
+            updateWeatherUI();
+            
+            // Initialize enhancement features
+            updateShopButtons();
+            updateToolUI(); // NEW: Initialize tool UI
+            
+            console.log('🌱 P5.js Isometric Farm MVP Enhanced Ready!');
+        }
+        
+        function draw() {
+            background(135, 206, 235);
+            
+            if (gameState.gameStarted) {
+                // Update all tiles
+                for (let y = 0; y < CONFIG.GRID_HEIGHT; y++) {
+                    for (let x = 0; x < CONFIG.GRID_WIDTH; x++) {
+                        gameState.grid[y][x].update();
+                    }
+                }
+                
+                drawGrid();
+                drawPlantMenu();
+                updatePlantStatusUI();
+                updateNarrativeUI();
+            } else {
+                // Show intro screen
+                fill(255);
+                textAlign(CENTER);
+                textSize(16);
+                text('🌱 Growtopia Farm', width/2, height/2);
+            }
+        }
+        
+        console.log('🚀 P5.js Isometric Farm MVP loaded! Complete with intro, weather, and all features!');
+    </script>
+</body>
+</html> 

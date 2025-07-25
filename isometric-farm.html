@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Isometric Farm Game</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #2c3e50;
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        #game-container {
+            border: 4px solid #34495e;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+        
+        .ui {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(44, 62, 80, 0.9);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            z-index: 1000;
+            min-width: 200px;
+        }
+        
+        .ui h3 {
+            margin: 0 0 10px 0;
+            color: #f39c12;
+        }
+        
+        .ui div {
+            margin: 5px 0;
+        }
+        
+        .instructions {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(44, 62, 80, 0.9);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 12px;
+            z-index: 1000;
+            max-width: 250px;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container"></div>
+    
+    <div class="ui">
+        <h3>🌱 Farm Stats</h3>
+        <div>🍎 Apples: <span id="apple-count">0</span></div>
+        <div>🌾 Crops: <span id="crop-count">0</span></div>
+        <div>💰 Coins: <span id="coins">100</span></div>
+    </div>
+    
+    <div class="instructions">
+        <h3>📋 How to Play</h3>
+        <div>• Click empty tiles to plant apples</div>
+        <div>• Crops grow automatically (4 stages)</div>
+        <div>• Click mature crops to harvest</div>
+        <div>• Each apple costs 10 coins to plant</div>
+        <div>• Harvesting gives 20 coins</div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+    <script>
+        // =============================================================================
+        // GAME CONFIGURATION
+        // =============================================================================
+        
+        const CONFIG = {
+            CANVAS_WIDTH: 1000,
+            CANVAS_HEIGHT: 700,
+            GRID_WIDTH: 8,
+            GRID_HEIGHT: 8,
+            TILE_WIDTH: 128,
+            TILE_HEIGHT: 64,
+            GROWTH_INTERVAL: 3000, // 3 seconds per stage
+            PLANT_COST: 10,
+            HARVEST_REWARD: 20
+        };
+        
+        // =============================================================================
+        // GAME STATE
+        // =============================================================================
+        
+        let gameState = {
+            grid: [],
+            assets: {},
+            coins: 100,
+            selectedTile: null
+        };
+        
+        // =============================================================================
+        // CROP SYSTEM
+        // =============================================================================
+        
+        class Crop {
+            constructor(type, x, y) {
+                this.type = type;
+                this.x = x;
+                this.y = y;
+                this.stage = 0;
+                this.maxStage = 3;
+                this.plantTime = Date.now();
+                this.lastGrowthTime = Date.now();
+            }
+            
+            update() {
+                const now = Date.now();
+                if (this.stage < this.maxStage && 
+                    now - this.lastGrowthTime > CONFIG.GROWTH_INTERVAL) {
+                    this.stage++;
+                    this.lastGrowthTime = now;
+                    console.log(`Crop at (${this.x}, ${this.y}) grew to stage ${this.stage}`);
+                }
+            }
+            
+            isReadyToHarvest() {
+                return this.stage === this.maxStage;
+            }
+            
+            getAssetKey() {
+                return `${this.type}_stage${this.stage}`;
+            }
+        }
+        
+        // =============================================================================
+        // ISOMETRIC UTILITIES
+        // =============================================================================
+        
+        function worldToScreen(worldX, worldY) {
+            const screenX = (worldX - worldY) * CONFIG.TILE_WIDTH / 2;
+            const screenY = (worldX + worldY) * CONFIG.TILE_HEIGHT / 2;
+            return { x: screenX, y: screenY };
+        }
+        
+        function screenToWorld(screenX, screenY) {
+            // Adjust for canvas center offset
+            const adjustedX = screenX - width / 2;
+            const adjustedY = screenY - 100;
+            
+            const worldX = (adjustedX / (CONFIG.TILE_WIDTH / 2) + adjustedY / (CONFIG.TILE_HEIGHT / 2)) / 2;
+            const worldY = (adjustedY / (CONFIG.TILE_HEIGHT / 2) - adjustedX / (CONFIG.TILE_WIDTH / 2)) / 2;
+            
+            return { 
+                x: Math.floor(worldX), 
+                y: Math.floor(worldY) 
+            };
+        }
+        
+        function isValidTile(x, y) {
+            return x >= 0 && x < CONFIG.GRID_WIDTH && y >= 0 && y < CONFIG.GRID_HEIGHT;
+        }
+        
+        // =============================================================================
+        // TILE SYSTEM
+        // =============================================================================
+        
+        class Tile {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.crop = null;
+                this.decoration = null;
+                this.type = 'grass'; // grass, soil, etc.
+            }
+            
+            plantCrop(cropType) {
+                if (this.crop === null && gameState.coins >= CONFIG.PLANT_COST) {
+                    this.crop = new Crop(cropType, this.x, this.y);
+                    this.type = 'soil';
+                    gameState.coins -= CONFIG.PLANT_COST;
+                    updateUI();
+                    return true;
+                }
+                return false;
+            }
+            
+            harvestCrop() {
+                if (this.crop && this.crop.isReadyToHarvest()) {
+                    gameState.coins += CONFIG.HARVEST_REWARD;
+                    this.crop = null;
+                    this.type = 'grass';
+                    updateUI();
+                    return true;
+                }
+                return false;
+            }
+            
+            update() {
+                if (this.crop) {
+                    this.crop.update();
+                }
+            }
+        }
+        
+        // =============================================================================
+        // ASSET MANAGEMENT
+        // =============================================================================
+        
+        function preload() {
+            // Create placeholder colored rectangles for now
+            // In a real game, you'd load actual images:
+            // gameState.assets.apple_stage0 = loadImage('assets/apple/stage0.png');
+            // etc.
+            
+            console.log('Loading assets...');
+            // We'll create these programmatically in setup()
+        }
+        
+        function createPlaceholderAssets() {
+            // Create colored rectangles as placeholders for actual assets
+            const assetData = {
+                'grass': { color: [34, 139, 34], size: [CONFIG.TILE_WIDTH, CONFIG.TILE_HEIGHT] },
+                'soil': { color: [101, 67, 33], size: [CONFIG.TILE_WIDTH, CONFIG.TILE_HEIGHT] },
+                'apple_stage0': { color: [50, 150, 50], size: [32, 40] },
+                'apple_stage1': { color: [70, 170, 70], size: [40, 50] },
+                'apple_stage2': { color: [90, 190, 90], size: [50, 70] },
+                'apple_stage3': { color: [255, 0, 0], size: [60, 80] }, // Red apple
+                'tree': { color: [34, 87, 34], size: [80, 120] },
+                'fence': { color: [139, 69, 19], size: [CONFIG.TILE_WIDTH, 40] }
+            };
+            
+            for (let [key, data] of Object.entries(assetData)) {
+                gameState.assets[key] = createGraphics(data.size[0], data.size[1]);
+                gameState.assets[key].fill(data.color[0], data.color[1], data.color[2]);
+                gameState.assets[key].noStroke();
+                
+                if (key.includes('tile') || key === 'grass' || key === 'soil') {
+                    // Draw diamond shape for tiles
+                    gameState.assets[key].beginShape();
+                    gameState.assets[key].vertex(data.size[0] / 2, 0);
+                    gameState.assets[key].vertex(data.size[0], data.size[1] / 2);
+                    gameState.assets[key].vertex(data.size[0] / 2, data.size[1]);
+                    gameState.assets[key].vertex(0, data.size[1] / 2);
+                    gameState.assets[key].endShape(CLOSE);
+                } else {
+                    // Draw rectangle for crops and decorations
+                    gameState.assets[key].rect(0, 0, data.size[0], data.size[1]);
+                }
+            }
+        }
+        
+        // =============================================================================
+        // RENDERING SYSTEM
+        // =============================================================================
+        
+        function drawTile(tile) {
+            const screenPos = worldToScreen(tile.x, tile.y);
+            const drawX = width / 2 + screenPos.x;
+            const drawY = 100 + screenPos.y;
+            
+            // 1. Draw base tile
+            const tileAsset = gameState.assets[tile.type];
+            if (tileAsset) {
+                image(tileAsset, 
+                      drawX - CONFIG.TILE_WIDTH / 2, 
+                      drawY - CONFIG.TILE_HEIGHT / 2);
+            }
+            
+            // 2. Draw crop (if any)
+            if (tile.crop) {
+                const cropAsset = gameState.assets[tile.crop.getAssetKey()];
+                if (cropAsset) {
+                    // Align bottom-center of crop to tile center
+                    image(cropAsset,
+                          drawX - cropAsset.width / 2,
+                          drawY - cropAsset.height + CONFIG.TILE_HEIGHT / 2);
+                }
+            }
+            
+            // 3. Draw decoration (if any)
+            if (tile.decoration) {
+                const decorAsset = gameState.assets[tile.decoration];
+                if (decorAsset) {
+                    image(decorAsset,
+                          drawX - decorAsset.width / 2,
+                          drawY - decorAsset.height + CONFIG.TILE_HEIGHT / 2);
+                }
+            }
+            
+            // 4. Draw selection highlight
+            if (gameState.selectedTile && 
+                gameState.selectedTile.x === tile.x && 
+                gameState.selectedTile.y === tile.y) {
+                stroke(255, 255, 0);
+                strokeWeight(3);
+                noFill();
+                
+                // Draw diamond outline
+                beginShape();
+                vertex(drawX, drawY - CONFIG.TILE_HEIGHT / 2);
+                vertex(drawX + CONFIG.TILE_WIDTH / 2, drawY);
+                vertex(drawX, drawY + CONFIG.TILE_HEIGHT / 2);
+                vertex(drawX - CONFIG.TILE_WIDTH / 2, drawY);
+                endShape(CLOSE);
+                
+                noStroke();
+            }
+        }
+        
+        function renderGrid() {
+            // Render row by row, column by column for proper layering
+            for (let y = 0; y < CONFIG.GRID_HEIGHT; y++) {
+                for (let x = 0; x < CONFIG.GRID_WIDTH; x++) {
+                    if (gameState.grid[y] && gameState.grid[y][x]) {
+                        drawTile(gameState.grid[y][x]);
+                    }
+                }
+            }
+        }
+        
+        // =============================================================================
+        // INPUT HANDLING
+        // =============================================================================
+        
+        function mousePressed() {
+            const worldPos = screenToWorld(mouseX, mouseY);
+            
+            if (isValidTile(worldPos.x, worldPos.y)) {
+                const tile = gameState.grid[worldPos.y][worldPos.x];
+                gameState.selectedTile = worldPos;
+                
+                // Handle tile interaction
+                if (tile.crop && tile.crop.isReadyToHarvest()) {
+                    // Harvest mature crop
+                    if (tile.harvestCrop()) {
+                        console.log(`Harvested crop at (${worldPos.x}, ${worldPos.y})`);
+                    }
+                } else if (!tile.crop) {
+                    // Plant new crop
+                    if (tile.plantCrop('apple')) {
+                        console.log(`Planted apple at (${worldPos.x}, ${worldPos.y})`);
+                    } else {
+                        console.log('Not enough coins to plant!');
+                    }
+                }
+            }
+        }
+        
+        // =============================================================================
+        // UI UPDATES
+        // =============================================================================
+        
+        function updateUI() {
+            document.getElementById('coins').textContent = gameState.coins;
+            
+            let cropCount = 0;
+            let appleCount = 0;
+            
+            for (let y = 0; y < CONFIG.GRID_HEIGHT; y++) {
+                for (let x = 0; x < CONFIG.GRID_WIDTH; x++) {
+                    const tile = gameState.grid[y][x];
+                    if (tile.crop) {
+                        cropCount++;
+                        if (tile.crop.isReadyToHarvest()) {
+                            appleCount++;
+                        }
+                    }
+                }
+            }
+            
+            document.getElementById('crop-count').textContent = cropCount;
+            document.getElementById('apple-count').textContent = appleCount;
+        }
+        
+        // =============================================================================
+        // MAIN GAME LOOP
+        // =============================================================================
+        
+        function setup() {
+            let canvas = createCanvas(CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT);
+            canvas.parent('game-container');
+            
+            // Initialize assets
+            createPlaceholderAssets();
+            
+            // Initialize grid
+            gameState.grid = [];
+            for (let y = 0; y < CONFIG.GRID_HEIGHT; y++) {
+                gameState.grid[y] = [];
+                for (let x = 0; x < CONFIG.GRID_WIDTH; x++) {
+                    gameState.grid[y][x] = new Tile(x, y);
+                }
+            }
+            
+            // Add some decorations for visual interest
+            if (gameState.grid[0][7]) gameState.grid[0][7].decoration = 'tree';
+            if (gameState.grid[7][0]) gameState.grid[7][0].decoration = 'tree';
+            
+            updateUI();
+            console.log('Isometric Farm Game initialized!');
+        }
+        
+        function draw() {
+            background(135, 206, 235); // Sky blue background
+            
+            // Update all tiles
+            for (let y = 0; y < CONFIG.GRID_HEIGHT; y++) {
+                for (let x = 0; x < CONFIG.GRID_WIDTH; x++) {
+                    gameState.grid[y][x].update();
+                }
+            }
+            
+            // Render the entire grid
+            renderGrid();
+            
+            // Update UI periodically
+            if (frameCount % 60 === 0) { // Every second
+                updateUI();
+            }
+        }
+        
+        // =============================================================================
+        // UTILITY FUNCTIONS FOR EXPANSION
+        // =============================================================================
+        
+        // Add new crop types easily
+        function addCropType(name, stages, growthTime) {
+            // You can extend this to load different crop assets
+            for (let i = 0; i <= stages; i++) {
+                // Create placeholder assets for new crop type
+                gameState.assets[`${name}_stage${i}`] = createGraphics(40 + i * 10, 50 + i * 15);
+                gameState.assets[`${name}_stage${i}`].fill(100 + i * 30, 150, 100);
+                gameState.assets[`${name}_stage${i}`].rect(0, 0, 40 + i * 10, 50 + i * 15);
+            }
+        }
+        
+        // Example: addCropType('carrot', 3, 2000);
+        
+        console.log('Isometric Farm Game loaded! Click tiles to plant and harvest.');
+    </script>
+</body>
+</html> 
