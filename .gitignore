@@ -1,0 +1,113 @@
+# =============================================================================
+# GROWTOPIA GAME - .GITIGNORE
+# Exclude large files, system files, and development artifacts
+# =============================================================================
+
+# Large Design Files
+*.psd
+*.ai
+*.sketch
+*.fig
+*.xcf
+*.blend
+
+# Large Media Files
+*.mov
+*.mp4
+*.avi
+*.mkv
+*.webm
+*.flv
+
+# Large Audio Files
+*.wav
+*.aiff
+*.flac
+*.mp3
+*.ogg
+
+# Large Archive Files
+*.zip
+*.rar
+*.7z
+*.tar.gz
+*.tar.bz2
+
+# System Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# IDE and Editor Files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.sublime-project
+.sublime-workspace
+
+# Node.js Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+.npm
+.yarn-integrity
+
+# Build Output
+dist/
+build/
+out/
+.cache/
+.parcel-cache/
+
+# Environment Files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+*.log
+logs/
+*.log.*
+
+# Temporary Files
+tmp/
+temp/
+.tmp/
+.temp/
+
+# OS Generated Files
+*.tmp
+*.bak
+*.swp
+*.lock
+
+# Game Specific Exclusions
+# Uncomment these if you want to exclude certain game assets:
+# assets/raw/          # Raw/unprocessed assets
+# assets/working/      # Work-in-progress assets
+# assets/backup/       # Asset backups
+# saves/              # Game save files
+# screenshots/        # Screenshots folder
+
+# Keep Important Files (Force Include)
+# Use ! to force include important files even if they match patterns above
+!README.md
+!package.json
+!*.html
+!*.js
+!*.css
+!*.json
+!assets/apple/*.png
+!assets/ui/*.png
+!assets/tools/*.png 
