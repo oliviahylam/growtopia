@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple P5.js Test</title>
+</head>
+<body>
+    <div id="game-container" style="width: 100vw; height: 100vh; background: #87ceeb;">
+        <h1>P5.js Test</h1>
+        <div id="debug-info">Loading...</div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+    <script>
+        console.log('🔍 Starting simple test...');
+        
+        function setup() {
+            console.log('🎨 P5.js setup() called');
+            const canvas = createCanvas(800, 600);
+            canvas.parent('game-container');
+            
+            document.getElementById('debug-info').textContent = 'P5.js loaded successfully!';
+        }
+        
+        function draw() {
+            background(100, 200, 100);
+            
+            // Draw a simple grid
+            stroke(255);
+            strokeWeight(1);
+            
+            for (let x = 0; x < width; x += 50) {
+                line(x, 0, x, height);
+            }
+            for (let y = 0; y < height; y += 50) {
+                line(0, y, width, y);
+            }
+            
+            // Draw some text
+            fill(255);
+            textAlign(CENTER);
+            textSize(16);
+            text('Simple P5.js Test Working!', width/2, height/2);
+            text(`Frame: ${frameCount}`, width/2, height/2 + 30);
+        }
+        
+        console.log('🚀 Simple test script loaded');
+    </script>
+</body>
+</html> 
