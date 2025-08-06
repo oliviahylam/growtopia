@@ -247,7 +247,7 @@
         
         /* Resources Panel */
         #resources-panel {
-            top: 10px;
+            top: 150px;
             left: 10px;
             width: 180px;
         }
@@ -261,9 +261,9 @@
         
         /* Weather Panel */
         #weather-panel {
-            top: 10px;
+            bottom: 410px;
             right: 10px;
-            width: 160px;
+            width: 200px;
         }
         
         .weather-info {
@@ -278,11 +278,15 @@
         
         /* Plant Status Panel */
         #plant-status-panel {
-            bottom: 10px;
-            left: 10px;
-            width: 250px;
-            max-height: 200px;
+            top: 180px;
+            right: 10px;
+            width: 150px;
+            max-height: 150px;
             overflow-y: auto;
+            display: none !important; /* Hide the panel visually - force override */
+            visibility: hidden !important; /* Additional hiding */
+            opacity: 0 !important; /* Make completely transparent */
+            pointer-events: none !important; /* Disable interactions */
         }
         
         .plant-status-item {
@@ -314,6 +318,8 @@
             bottom: 10px;
             right: 10px;
             width: 200px;
+            height: 360px;
+            overflow-y: auto;
         }
         
         .shop-category {
@@ -360,14 +366,14 @@
         
         /* Inventory Panel */
         #inventory-panel {
-            top: 180px;
+            top: 320px;
             left: 10px;
             width: 180px;
         }
         
         /* Narrative Panel */
         #narrative-panel {
-            top: 180px;
+            top: 280px;
             right: 10px;
             width: 160px;
         }
@@ -1103,7 +1109,7 @@
         /* Focus Mode Button */
         .focus-mode-button {
             position: fixed;
-            top: 20px;
+            top: 60px;
             right: 20px; /* Moved to top-right for better accessibility */
             background: linear-gradient(145deg, #8e44ad, #9b59b6);
             border: 2px solid #9b59b6;
@@ -1142,8 +1148,8 @@
         /* Restart Button */
         .restart-button {
             position: fixed;
-            top: 60px;
-            left: 150px;
+            top: 100px;
+            left: 10px;
             background: linear-gradient(145deg, #e74c3c, #c0392b);
             border: 2px solid #e74c3c;
             color: white;
@@ -2427,7 +2433,7 @@
         .focus-side-panel {
             position: fixed;
             left: 10px;
-            top: 70px;
+            top: 110px;
             width: 200px;
             background: rgba(52, 73, 94, 0.95);
             color: white;
@@ -3307,7 +3313,7 @@
         
         /* Resources Panel */
         #resources-panel {
-            top: 10px;
+            top: 150px;
             left: 10px;
             width: 180px;
         }
@@ -3321,9 +3327,9 @@
         
         /* Weather Panel */
         #weather-panel {
-            top: 10px;
+            bottom: 410px;
             right: 10px;
-            width: 160px;
+            width: 200px;
         }
         
         .weather-info {
@@ -3338,11 +3344,15 @@
         
         /* Plant Status Panel */
         #plant-status-panel {
-            bottom: 10px;
-            left: 10px;
-            width: 250px;
-            max-height: 200px;
+            top: 180px;
+            right: 10px;
+            width: 150px;
+            max-height: 150px;
             overflow-y: auto;
+            display: none !important; /* Hide the panel visually - force override */
+            visibility: hidden !important; /* Additional hiding */
+            opacity: 0 !important; /* Make completely transparent */
+            pointer-events: none !important; /* Disable interactions */
         }
         
         .plant-status-item {
@@ -3374,6 +3384,8 @@
             bottom: 10px;
             right: 10px;
             width: 200px;
+            height: 360px;
+            overflow-y: auto;
         }
         
         .shop-category {
@@ -3420,14 +3432,14 @@
         
         /* Inventory Panel */
         #inventory-panel {
-            top: 180px;
+            top: 320px;
             left: 10px;
             width: 180px;
         }
         
         /* Narrative Panel */
         #narrative-panel {
-            top: 180px;
+            top: 280px;
             right: 10px;
             width: 160px;
         }
@@ -4163,7 +4175,7 @@
         /* Focus Mode Button */
         .focus-mode-button {
             position: fixed;
-            top: 20px;
+            top: 60px;
             right: 20px; /* Moved to top-right for better accessibility */
             background: linear-gradient(145deg, #8e44ad, #9b59b6);
             border: 2px solid #9b59b6;
@@ -4202,8 +4214,8 @@
         /* Restart Button */
         .restart-button {
             position: fixed;
-            top: 60px;
-            left: 150px;
+            top: 100px;
+            left: 10px;
             background: linear-gradient(145deg, #e74c3c, #c0392b);
             border: 2px solid #e74c3c;
             color: white;
@@ -5487,7 +5499,7 @@
         .focus-side-panel {
             position: fixed;
             left: 10px;
-            top: 70px;
+            top: 110px;
             width: 200px;
             background: rgba(52, 73, 94, 0.95);
             color: white;
@@ -6544,7 +6556,7 @@
     </div>
     
     <!-- Resources Panel -->
-    <div id="resources-panel" class="ui-panel">
+    <div id="resources-panel" class="ui-panel" style="top: 150px;">
                         <h3>🌾 Garden Resources</h3>
         <div class="resource-item">
                             <span><img src="assets/coin.png" alt="Coin" style="width: 20px; height: 20px; vertical-align: middle;"> Coins:</span>
@@ -6569,7 +6581,7 @@
     </div>
     
     <!-- Enhanced Live Weather Panel -->
-    <div id="weather-panel" class="ui-panel">
+    <div id="weather-panel" class="ui-panel" style="bottom: 410px; right: 10px; width: 200px;">
         <h3>🌍 Live Weather</h3>
         <div class="weather-info">
             <div class="weather-icon" id="weather-icon"><img src="assets/sun.png" alt="Sun" style="width: 24px; height: 24px;"></div>
@@ -6669,7 +6681,7 @@
     </div>
     
     <!-- Plant Status Panel -->
-    <div id="plant-status-panel" class="ui-panel">
+    <div id="plant-status-panel" class="ui-panel" style="top: 180px; right: 10px; width: 150px; display: none;">
         <h3>🌱 Plant Status</h3>
         <div id="plant-status-list">
             <div style="text-align: center; color: #95a5a6; font-size: 8px;">
@@ -6679,7 +6691,7 @@
     </div>
     
     <!-- Enhanced Inventory Panel -->
-    <div id="inventory-panel" class="ui-panel" style="top: 70px; left: 10px; width: 180px;">
+            <div id="inventory-panel" class="ui-panel" style="top: 320px; left: 10px; width: 180px;">
         <h3>📦 Inventory</h3>
         
         <div class="inventory-section">
@@ -6756,7 +6768,7 @@
     </div>
     
     <!-- Shop Panel -->
-    <div id="shop-panel" class="ui-panel">
+    <div id="shop-panel" class="ui-panel" style="bottom: 10px; right: 10px; width: 200px; height: 360px;">
                         <h3>🛒 Garden Shop</h3>
         
         <div class="shop-category">
@@ -6780,7 +6792,7 @@
     </div>
     
     <!-- Narrative Panel -->
-    <div id="narrative-panel" class="ui-panel">
+    <div id="narrative-panel" class="ui-panel" style="top: 280px; left: 1000px;">
         <h3>🧙‍♂️ Garden Spirit</h3>
         <div class="narrative-text" id="narrative-text">
             "Welcome to your new garden! The soil here is rich with ancient magic..."
@@ -8886,7 +8898,6 @@
                 case 'rainy':
                 case 'rain':
                 case 'light rain':
-                case 'drizzle':
                 case 'shower rain':
                 case 'moderate rain':
                     tint.classList.add('rain');
@@ -9321,7 +9332,7 @@
             
             // Use transformed coordinates for game logic
             const worldPos = screenToWorld(transformedCoords.x, transformedCoords.y);
-            console.log('🌍 World position:', worldPos);
+            console.log('🌎 World position:', worldPos);
             
             // Handle plant menu
             if (gameState.showPlantMenu) {
@@ -9801,6 +9812,43 @@
             document.getElementById('intro-popup-2').style.display = 'flex';
         }
         
+        // Garden background music system
+        let gardenBackgroundMusic = null;
+        
+        function initializeGardenBackgroundMusic() {
+            if (!gardenBackgroundMusic) {
+                gardenBackgroundMusic = new Audio('assets/Audios/background.mp3');
+                gardenBackgroundMusic.loop = true;
+                gardenBackgroundMusic.volume = 0.3; // Lower volume for background
+                
+                gardenBackgroundMusic.addEventListener('canplay', () => {
+                    console.log('🎵 Garden background music ready');
+                });
+                
+                gardenBackgroundMusic.addEventListener('error', (e) => {
+                    console.error('🎵 Garden background music error:', e);
+                });
+            }
+        }
+        
+        function startGardenBackgroundMusic() {
+            if (gardenBackgroundMusic && !gameState.focusMode.isActive) {
+                gardenBackgroundMusic.play().then(() => {
+                    console.log('🎵 Garden background music started');
+                }).catch(e => {
+                    console.error('🎵 Garden background music play error:', e);
+                });
+            }
+        }
+        
+        function stopGardenBackgroundMusic() {
+            if (gardenBackgroundMusic) {
+                gardenBackgroundMusic.pause();
+                gardenBackgroundMusic.currentTime = 0;
+                console.log('🎵 Garden background music stopped');
+            }
+        }
+        
         function startGame() {
             document.getElementById('intro-popup-2').style.display = 'none';
             gameState.gameStarted = true;
@@ -9812,6 +9860,10 @@
             // Initialize enhancement features
             updateShopButtons();
             createWeatherEffects(gameState.weather.condition);
+            
+            // Initialize and start garden background music
+            initializeGardenBackgroundMusic();
+            startGardenBackgroundMusic();
             
             showPurchaseNotification('🌱 Welcome to your new garden!');
             
@@ -10123,7 +10175,7 @@
         
         // NEW: Tool cursor system
         function drawToolCursor(screenX, screenY, tile) {
-            if (!gameState.selectedTool) return;
+            if (!gameState.selectedTool || !tile.crop) return;
             
             // Check if mouse is over this tile
             const worldPos = screenToWorld(mouseX, mouseY);
@@ -11205,6 +11257,9 @@
             console.log('📦 Inventory structure:', gameState.inventory);
             console.log('🌱 Grid initialized:', !!gameState.grid, 'Size:', gameState.grid?.length);
             
+            // Initialize garden background music
+            initializeGardenBackgroundMusic();
+            
             // Initialize live weather with geolocation
             updateLiveWeather();
             
@@ -11366,6 +11421,9 @@
                     console.log('🎯 Completing Focus Mode ON');
                     gameState.focusMode.isInSession = false; // Reset session state
                     
+                    // Stop garden background music when entering focus mode
+                    stopGardenBackgroundMusic();
+                    
                     // Hide normal panels and show focus panels
                     hideNormalUIPanels();
                     showFocusModePanels();
@@ -11395,6 +11453,9 @@
                     if (gameState.focusMode.timer.isRunning) {
                         stopTimer();
                     }
+                    
+                    // Start garden background music when returning to garden mode
+                    startGardenBackgroundMusic();
                     
                     // Hide focus panels and show normal panels
                     hideFocusModePanels();
