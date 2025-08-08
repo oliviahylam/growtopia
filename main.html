@@ -12442,7 +12442,7 @@
             GRID_SPACING_X: 1.0,    // Horizontal spacing between tiles (1.0 = touching)
             GRID_SPACING_Y: 1.0,    // Vertical spacing between tiles (1.0 = touching)
             GRID_OFFSET_X: window.innerWidth / 2,  // Horizontal centering
-            GRID_OFFSET_Y: window.innerHeight / 2 - 50, // Centered on dirt patch with slight upward offset
+            GRID_OFFSET_Y: window.innerHeight / 2 - 20, // Centered on dirt patch, moved down
             
             // Responsive scaling
             RESPONSIVE_SCALE: 1,    // Current scale factor
@@ -14330,7 +14330,7 @@
             
             // Update grid offsets to center on dirt patch
             CONFIG.GRID_OFFSET_X = (containerWidth / 2) - 15; // Shifted more to the left
-            CONFIG.GRID_OFFSET_Y = (containerHeight / 2 - CONFIG.TILE_HEIGHT) + 2; // Shifted 2px down
+            CONFIG.GRID_OFFSET_Y = (containerHeight / 2 - CONFIG.TILE_HEIGHT) + 30; // Moved down by 30px
             
             console.log(`🔧 Responsive scale updated: ${scaleFactor.toFixed(3)}x (Tile: ${CONFIG.TILE_WIDTH.toFixed(1)}x${CONFIG.TILE_HEIGHT.toFixed(1)}) Container: ${containerWidth}x${containerHeight}`);
             
