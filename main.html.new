@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Growtopia</title>
+    <style>
+        /* Existing styles */
+        
+        /* Auth styles */
+        #auth-container {
+            display: flex;
+            align-items: center;
+            margin: 0 20px;
+        }
+
+        .login-btn {
+            background: #ffffff;
+            color: #333333;
+            border: 1px solid #dddddd;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s ease;
+        }
+        
+        .login-btn:hover {
+            background: #f5f5f5;
+        }
+
+        #user-profile {
+            display: none;
+            align-items: center;
+            color: white;
+            gap: 10px;
+        }
+
+        #user-profile img {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+        }
+
+        .logout-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+
+        .logout-btn:hover {
+            background: #c0392b;
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    <div class="top-ui-bar">
+        <button class="garden-btn" onclick="showGarden()">🌱 Garden</button>
+        <div id="auth-container">
+            <button class="login-btn" id="google-login" onclick="handleGoogleLogin()">
+                <img src="https://www.google.com/favicon.ico" alt="Google" style="width: 16px; height: 16px; vertical-align: middle; margin-right: 5px;">
+                Sign in with Google
+            </button>
+            <div id="user-profile">
+                <img id="user-avatar" src="" alt="User">
+                <span id="user-name"></span>
+                <button class="logout-btn" onclick="handleLogout()">Logout</button>
+            </div>
+        </div>
+        <button class="focus-btn" onclick="showFocusMode()">🎯 Focus Mode</button>
+    </div>
+
+    <!-- Rest of your game content -->
+
+    <!-- Add Firebase scripts -->
+    <script type="module" src="js/firebase-config.js"></script>
+    <script type="module" src="js/auth-service.js"></script>
+    <script type="module" src="js/auth.js"></script>
+</body>
+</html> 
