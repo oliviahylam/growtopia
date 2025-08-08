@@ -12426,28 +12426,28 @@
             CANVAS_WIDTH: window.innerWidth,
             CANVAS_HEIGHT: window.innerHeight,
             
-            // Grid dimensions - 4x4 grid
+            // Grid dimensions
             GRID_WIDTH: 4,
             GRID_HEIGHT: 4,
             
             // Base tile sizes (never change)
-            BASE_TILE_WIDTH: 120,   // Base tile width for scaling calculations
-            BASE_TILE_HEIGHT: 60,   // Base tile height for scaling calculations (2:1 ratio)
+            BASE_TILE_WIDTH: 128,   // Base tile width for scaling calculations
+            BASE_TILE_HEIGHT: 64,   // Base tile height for scaling calculations (2:1 ratio)
             
             // Current tile sizes (updated by responsive scaling)
-            TILE_WIDTH: 120,        // Current tile width
-            TILE_HEIGHT: 60,        // Current tile height
+            TILE_WIDTH: 128,        // Current tile width
+            TILE_HEIGHT: 64,        // Current tile height
             
             // Grid spacing and offsets
             GRID_SPACING_X: 1.0,    // Horizontal spacing between tiles (1.0 = touching)
             GRID_SPACING_Y: 1.0,    // Vertical spacing between tiles (1.0 = touching)
             GRID_OFFSET_X: window.innerWidth / 2,  // Horizontal centering
-            GRID_OFFSET_Y: window.innerHeight / 2 - 50, // Centered on dirt patch with slight upward offset
+            GRID_OFFSET_Y: window.innerHeight / 3, // Vertical position
             
             // Responsive scaling
             RESPONSIVE_SCALE: 1,    // Current scale factor
-            MIN_SCALE: 0.4,        // Minimum scale factor (smaller to fit dirt patch)
-            MAX_SCALE: 1.2,        // Maximum scale factor (limited to avoid too large tiles)
+            MIN_SCALE: 0.5,        // Minimum scale factor
+            MAX_SCALE: 1.5,        // Maximum scale factor
             
             // Base design size for scaling calculations
             BACKGROUND_BASE_WIDTH: 1920,   // Base design width
@@ -14312,9 +14312,9 @@
             const containerWidth = container.offsetWidth || window.innerWidth;
             const containerHeight = container.offsetHeight || window.innerHeight;
             
-            // Calculate scale factors to fit grid in dirt patch (about 50% of screen)
-            const scaleX = (containerWidth * 0.5) / (CONFIG.GRID_WIDTH * CONFIG.BASE_TILE_WIDTH);
-            const scaleY = (containerHeight * 0.4) / (CONFIG.GRID_HEIGHT * CONFIG.BASE_TILE_HEIGHT);
+            // Calculate scale factor relative to base design size
+            const scaleX = containerWidth / CONFIG.BACKGROUND_BASE_WIDTH;
+            const scaleY = containerHeight / CONFIG.BACKGROUND_BASE_HEIGHT;
             
             // Use the smaller scale to ensure everything fits, clamped to min/max
             const scaleFactor = Math.max(CONFIG.MIN_SCALE, Math.min(CONFIG.MAX_SCALE, Math.min(scaleX, scaleY)));
@@ -14328,9 +14328,9 @@
             CONFIG.GRID_SPACING_X = 1.0 * scaleFactor;
             CONFIG.GRID_SPACING_Y = 1.0 * scaleFactor;
             
-            // Update grid offsets to center on dirt patch
-            CONFIG.GRID_OFFSET_X = (containerWidth / 2) - 15; // Shifted more to the left
-            CONFIG.GRID_OFFSET_Y = (containerHeight / 2 - CONFIG.TILE_HEIGHT) + 2; // Shifted 2px down
+            // Update grid offsets for centering
+            CONFIG.GRID_OFFSET_X = containerWidth / 2;
+            CONFIG.GRID_OFFSET_Y = containerHeight / 3;
             
             console.log(`🔧 Responsive scale updated: ${scaleFactor.toFixed(3)}x (Tile: ${CONFIG.TILE_WIDTH.toFixed(1)}x${CONFIG.TILE_HEIGHT.toFixed(1)}) Container: ${containerWidth}x${containerHeight}`);
             
