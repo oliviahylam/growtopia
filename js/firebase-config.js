@@ -5,12 +5,13 @@ import { getAuth } from "firebase/auth";
 // Your web app's Firebase configuration
 // Replace these with your Firebase project configuration
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_AUTH_DOMAIN",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_STORAGE_BUCKET",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID"
+    apiKey: "AIzaSyDgKmRbetIdTwIV2M6kwEDLFev35AiivWU",
+    authDomain: "growtopia-a59e0.firebaseapp.com",
+    projectId: "growtopia-a59e0",
+    storageBucket: "growtopia-a59e0.firebasestorage.app",
+    messagingSenderId: "86362955631",
+    appId: "1:86362955631:web:8e45d9d5fe784394a2129a",
+    measurementId: "G-15TY2TS3ZX"
 };
 
 // Initialize Firebase
