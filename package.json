@@ -18,8 +18,9 @@
   ],
   "author": "Growtopia Team",
   "license": "MIT",
-  "devDependencies": {},
-  "dependencies": {},
+  "dependencies": {
+    "firebase": "^12.1.0"
+  },
   "engines": {
     "node": ">=12.0.0"
   },
