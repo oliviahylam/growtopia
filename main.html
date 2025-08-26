@@ -25,15 +25,65 @@
             width: 100vw;
             height: 100vh;
             background-image: url('assets/isometric_garden.png');
-            background-size: 130%; /* Zoom to 130% to show center of image */
+            background-size: 130%; /* Zoom to 130% while covering full screen */
             background-position: center center; /* Center the image */
             background-repeat: no-repeat; /* Don't repeat the image */
             background-color: #87ceeb; /* Fallback color if image fails to load */
+            background-attachment: fixed; /* Keep background fixed during scaling */
             cursor: grab;
         }
         
         #game-container:active {
             cursor: grabbing;
+        }
+        
+        /* Panel toggle buttons - visible on all screen sizes */
+        .panel-toggle {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #f39c12;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s ease;
+        }
+        
+        .panel-toggle:hover {
+            background: #e67e22;
+        }
+        
+        .panel-toggle:active {
+            transform: scale(0.95);
+            background: #d35400;
+        }
+        
+        /* Collapsed panel styles for all screen sizes */
+        .ui-panel.collapsed {
+            height: 40px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .ui-panel.collapsed .panel-content {
+            display: none;
+        }
+        
+        .ui-panel.collapsed h3 {
+            margin: 0;
+            font-size: 12px;
+            color: #f39c12;
         }
         
         /* Canvas scaling transitions for Focus Mode */
@@ -234,6 +284,10 @@
             font-size: 9px;
             backdrop-filter: blur(5px);
             z-index: 1000;
+            width: 200px; /* Standardized width for all panels */
+            box-sizing: border-box;
+            max-height: calc(100vh - 20px); /* Ensure panels don't exceed viewport */
+            overflow-y: auto; /* Add scrolling if content is too tall */
         }
         
         .ui-panel h3 {
@@ -247,7 +301,7 @@
         
         /* Resources Panel */
         #resources-panel {
-            top: 150px;
+            top: 180px; /* Below top nav bar (50px) + restart button (100px) + clearance */
             left: 10px;
             width: 180px;
         }
@@ -261,7 +315,7 @@
         
         /* Weather Panel */
         #weather-panel {
-            bottom: 410px;
+            top: 180px; /* Below top nav bar (50px) + focus mode button (60px) + clearance, align with resources panel */
             right: 10px;
             width: 200px;
         }
@@ -366,7 +420,7 @@
         
         /* Inventory Panel */
         #inventory-panel {
-            top: 320px;
+            top: 270px;
             left: 10px;
             width: 180px;
         }
@@ -1109,7 +1163,7 @@
         /* Focus Mode Button */
         .focus-mode-button {
             position: fixed;
-            top: 60px;
+            top: 120px; /* Increased clearance below top nav bar (50px) + more margin */
             right: 20px; /* Moved to top-right for better accessibility */
             background: linear-gradient(145deg, #8e44ad, #9b59b6);
             border: 2px solid #9b59b6;
@@ -1148,8 +1202,8 @@
         /* Restart Button */
         .restart-button {
             position: fixed;
-            top: 100px;
-            left: 10px;
+            top: 120px; /* Increased clearance below top nav bar (50px) + more margin, align with focus mode button */
+            left: 20px; /* Align with focus mode button margin */
             background: linear-gradient(145deg, #e74c3c, #c0392b);
             border: 2px solid #e74c3c;
             color: white;
@@ -1832,34 +1886,58 @@
         
         /* Timer Settings */
         .timer-settings {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-            margin: 20px 0;
-            flex-wrap: wrap;
+            display: grid !important;
+            grid-template-columns: 1fr 1fr 1fr !important;
+            gap: 10px !important;
+            margin: 20px auto !important;
+            width: 300px !important;
+            align-items: start !important;
         }
         
         .setting-group {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 5px;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 6px !important;
+            background: rgba(52, 73, 94, 0.8) !important;
+            border: 1px solid #f39c12 !important;
+            border-radius: 6px !important;
+            padding: 10px 5px !important;
+            height: 60px !important;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3) !important;
+            transition: all 0.2s ease !important;
+        }
+        
+        .setting-group:hover {
+            border-color: #f39c12;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transform: translateY(-2px);
         }
         
         .setting-group label {
-            font-size: 10px;
-            color: #bdc3c7;
+            font-size: 8px !important;
+            color: #bdc3c7 !important;
+            font-weight: normal !important;
+            text-align: center !important;
+            margin: 0 !important;
+            line-height: 1.1 !important;
+            white-space: nowrap !important;
         }
         
         .setting-group input {
-            background: #34495e;
-            border: 1px solid #2c3e50;
-            color: white;
-            padding: 5px;
-            border-radius: 4px;
-            width: 60px;
-            text-align: center;
-            font-family: inherit;
+            background: #34495e !important;
+            border: 1px solid #2c3e50 !important;
+            color: white !important;
+            padding: 3px !important;
+            border-radius: 3px !important;
+            width: 45px !important;
+            height: 24px !important;
+            text-align: center !important;
+            font-family: inherit !important;
+            font-size: 11px !important;
+            font-weight: bold !important;
+            box-sizing: border-box !important;
         }
         
         /* Music Panel */
@@ -2208,10 +2286,7 @@
                 gap: 10px;
             }
             
-            .timer-settings {
-                flex-direction: column;
-                gap: 15px;
-            }
+            /* Timer settings now use vertical layout by default */
             
             .music-panel,
             .focus-streak {
@@ -2272,7 +2347,7 @@
             top: 50px;
             left: 0;
             right: 0;
-            height: 40px;
+            height: 60px;
             background: linear-gradient(145deg, #2c3e50, #34495e);
             border-bottom: 2px solid #f39c12;
             display: flex;
@@ -3091,15 +3166,65 @@
             width: 100vw;
             height: 100vh;
             background-image: url('assets/isometric_garden.png');
-            background-size: 130%; /* Zoom to 130% to show center of image */
+            background-size: 130%; /* Zoom to 130% while covering full screen */
             background-position: center center; /* Center the image */
             background-repeat: no-repeat; /* Don't repeat the image */
             background-color: #87ceeb; /* Fallback color if image fails to load */
+            background-attachment: fixed; /* Keep background fixed during scaling */
             cursor: grab;
         }
         
         #game-container:active {
             cursor: grabbing;
+        }
+        
+        /* Panel toggle buttons - visible on all screen sizes */
+        .panel-toggle {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #f39c12;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s ease;
+        }
+        
+        .panel-toggle:hover {
+            background: #e67e22;
+        }
+        
+        .panel-toggle:active {
+            transform: scale(0.95);
+            background: #d35400;
+        }
+        
+        /* Collapsed panel styles for all screen sizes */
+        .ui-panel.collapsed {
+            height: 40px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .ui-panel.collapsed .panel-content {
+            display: none;
+        }
+        
+        .ui-panel.collapsed h3 {
+            margin: 0;
+            font-size: 12px;
+            color: #f39c12;
         }
         
         /* Canvas scaling transitions for Focus Mode */
@@ -3300,6 +3425,10 @@
             font-size: 9px;
             backdrop-filter: blur(5px);
             z-index: 1000;
+            width: 200px; /* Standardized width for all panels */
+            box-sizing: border-box;
+            max-height: calc(100vh - 20px); /* Ensure panels don't exceed viewport */
+            overflow-y: auto; /* Add scrolling if content is too tall */
         }
         
         .ui-panel h3 {
@@ -3313,7 +3442,7 @@
         
         /* Resources Panel */
         #resources-panel {
-            top: 150px;
+            top: 180px; /* Below top nav bar (50px) + restart button (100px) + clearance */
             left: 10px;
             width: 180px;
         }
@@ -3327,7 +3456,7 @@
         
         /* Weather Panel */
         #weather-panel {
-            bottom: 410px;
+            top: 180px; /* Below top nav bar (50px) + focus mode button (60px) + clearance, align with resources panel */
             right: 10px;
             width: 200px;
         }
@@ -3432,7 +3561,7 @@
         
         /* Inventory Panel */
         #inventory-panel {
-            top: 320px;
+            top: 270px;
             left: 10px;
             width: 180px;
         }
@@ -4175,7 +4304,7 @@
         /* Focus Mode Button */
         .focus-mode-button {
             position: fixed;
-            top: 60px;
+            top: 120px; /* Increased clearance below top nav bar (50px) + more margin */
             right: 20px; /* Moved to top-right for better accessibility */
             background: linear-gradient(145deg, #8e44ad, #9b59b6);
             border: 2px solid #9b59b6;
@@ -4214,8 +4343,8 @@
         /* Restart Button */
         .restart-button {
             position: fixed;
-            top: 100px;
-            left: 10px;
+            top: 120px; /* Increased clearance below top nav bar (50px) + more margin, align with focus mode button */
+            left: 20px; /* Align with focus mode button margin */
             background: linear-gradient(145deg, #e74c3c, #c0392b);
             border: 2px solid #e74c3c;
             color: white;
@@ -4898,34 +5027,58 @@
         
         /* Timer Settings */
         .timer-settings {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-            margin: 20px 0;
-            flex-wrap: wrap;
+            display: grid !important;
+            grid-template-columns: 1fr 1fr 1fr !important;
+            gap: 10px !important;
+            margin: 20px auto !important;
+            width: 300px !important;
+            align-items: start !important;
         }
         
         .setting-group {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 5px;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 6px !important;
+            background: rgba(52, 73, 94, 0.8) !important;
+            border: 1px solid #f39c12 !important;
+            border-radius: 6px !important;
+            padding: 10px 5px !important;
+            height: 60px !important;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3) !important;
+            transition: all 0.2s ease !important;
+        }
+        
+        .setting-group:hover {
+            border-color: #f39c12;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transform: translateY(-2px);
         }
         
         .setting-group label {
-            font-size: 10px;
-            color: #bdc3c7;
+            font-size: 8px !important;
+            color: #bdc3c7 !important;
+            font-weight: normal !important;
+            text-align: center !important;
+            margin: 0 !important;
+            line-height: 1.1 !important;
+            white-space: nowrap !important;
         }
         
         .setting-group input {
-            background: #34495e;
-            border: 1px solid #2c3e50;
-            color: white;
-            padding: 5px;
-            border-radius: 4px;
-            width: 60px;
-            text-align: center;
-            font-family: inherit;
+            background: #34495e !important;
+            border: 1px solid #2c3e50 !important;
+            color: white !important;
+            padding: 3px !important;
+            border-radius: 3px !important;
+            width: 45px !important;
+            height: 24px !important;
+            text-align: center !important;
+            font-family: inherit !important;
+            font-size: 11px !important;
+            font-weight: bold !important;
+            box-sizing: border-box !important;
         }
         
         /* Music Panel */
@@ -5274,10 +5427,7 @@
                 gap: 10px;
             }
             
-            .timer-settings {
-                flex-direction: column;
-                gap: 15px;
-            }
+            /* Timer settings now use vertical layout by default */
             
             .music-panel,
             .focus-streak {
@@ -5338,7 +5488,7 @@
             top: 50px;
             left: 0;
             right: 0;
-            height: 40px;
+            height: 60px;
             background: linear-gradient(145deg, #2c3e50, #34495e);
             border-bottom: 2px solid #f39c12;
             display: flex;
@@ -5465,7 +5615,14 @@
         }
         
         .focus-timer-display {
-<!DOCTYPE html>
+            font-size: 16px;
+            font-weight: bold;
+            color: #2ecc71;
+        }
+    </style>
+</head>
+<body>
+    <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -5492,15 +5649,65 @@
             width: 100vw;
             height: 100vh;
             background-image: url('assets/isometric_garden.png');
-            background-size: 130%; /* Zoom to 130% to show center of image */
+            background-size: 130%; /* Zoom to 130% while covering full screen */
             background-position: center center; /* Center the image */
             background-repeat: no-repeat; /* Don't repeat the image */
             background-color: #87ceeb; /* Fallback color if image fails to load */
+            background-attachment: fixed; /* Keep background fixed during scaling */
             cursor: grab;
         }
         
         #game-container:active {
             cursor: grabbing;
+        }
+        
+        /* Panel toggle buttons - visible on all screen sizes */
+        .panel-toggle {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #f39c12;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s ease;
+        }
+        
+        .panel-toggle:hover {
+            background: #e67e22;
+        }
+        
+        .panel-toggle:active {
+            transform: scale(0.95);
+            background: #d35400;
+        }
+        
+        /* Collapsed panel styles for all screen sizes */
+        .ui-panel.collapsed {
+            height: 40px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .ui-panel.collapsed .panel-content {
+            display: none;
+        }
+        
+        .ui-panel.collapsed h3 {
+            margin: 0;
+            font-size: 12px;
+            color: #f39c12;
         }
         
         /* Canvas scaling transitions for Focus Mode */
@@ -5701,6 +5908,10 @@
             font-size: 9px;
             backdrop-filter: blur(5px);
             z-index: 1000;
+            width: 200px; /* Standardized width for all panels */
+            box-sizing: border-box;
+            max-height: calc(100vh - 20px); /* Ensure panels don't exceed viewport */
+            overflow-y: auto; /* Add scrolling if content is too tall */
         }
         
         .ui-panel h3 {
@@ -5714,7 +5925,7 @@
         
         /* Resources Panel */
         #resources-panel {
-            top: 150px;
+            top: 180px; /* Below top nav bar (50px) + restart button (100px) + clearance */
             left: 10px;
             width: 180px;
         }
@@ -5728,7 +5939,7 @@
         
         /* Weather Panel */
         #weather-panel {
-            bottom: 410px;
+            top: 180px; /* Below top nav bar (50px) + focus mode button (60px) + clearance, align with resources panel */
             right: 10px;
             width: 200px;
         }
@@ -5833,7 +6044,7 @@
         
         /* Inventory Panel */
         #inventory-panel {
-            top: 320px;
+            top: 270px;
             left: 10px;
             width: 180px;
         }
@@ -6576,7 +6787,7 @@
         /* Focus Mode Button */
         .focus-mode-button {
             position: fixed;
-            top: 60px;
+            top: 120px; /* Increased clearance below top nav bar (50px) + more margin */
             right: 20px; /* Moved to top-right for better accessibility */
             background: linear-gradient(145deg, #8e44ad, #9b59b6);
             border: 2px solid #9b59b6;
@@ -6615,8 +6826,8 @@
         /* Restart Button */
         .restart-button {
             position: fixed;
-            top: 100px;
-            left: 10px;
+            top: 120px; /* Increased clearance below top nav bar (50px) + more margin, align with focus mode button */
+            left: 20px; /* Align with focus mode button margin */
             background: linear-gradient(145deg, #e74c3c, #c0392b);
             border: 2px solid #e74c3c;
             color: white;
@@ -7299,34 +7510,58 @@
         
         /* Timer Settings */
         .timer-settings {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-            margin: 20px 0;
-            flex-wrap: wrap;
+            display: grid !important;
+            grid-template-columns: 1fr 1fr 1fr !important;
+            gap: 10px !important;
+            margin: 20px auto !important;
+            width: 300px !important;
+            align-items: start !important;
         }
         
         .setting-group {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 5px;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 6px !important;
+            background: rgba(52, 73, 94, 0.8) !important;
+            border: 1px solid #f39c12 !important;
+            border-radius: 6px !important;
+            padding: 10px 5px !important;
+            height: 60px !important;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3) !important;
+            transition: all 0.2s ease !important;
+        }
+        
+        .setting-group:hover {
+            border-color: #f39c12;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transform: translateY(-2px);
         }
         
         .setting-group label {
-            font-size: 10px;
-            color: #bdc3c7;
+            font-size: 8px !important;
+            color: #bdc3c7 !important;
+            font-weight: normal !important;
+            text-align: center !important;
+            margin: 0 !important;
+            line-height: 1.1 !important;
+            white-space: nowrap !important;
         }
         
         .setting-group input {
-            background: #34495e;
-            border: 1px solid #2c3e50;
-            color: white;
-            padding: 5px;
-            border-radius: 4px;
-            width: 60px;
-            text-align: center;
-            font-family: inherit;
+            background: #34495e !important;
+            border: 1px solid #2c3e50 !important;
+            color: white !important;
+            padding: 3px !important;
+            border-radius: 3px !important;
+            width: 45px !important;
+            height: 24px !important;
+            text-align: center !important;
+            font-family: inherit !important;
+            font-size: 11px !important;
+            font-weight: bold !important;
+            box-sizing: border-box !important;
         }
         
         /* Music Panel */
@@ -7675,10 +7910,7 @@
                 gap: 10px;
             }
             
-            .timer-settings {
-                flex-direction: column;
-                gap: 15px;
-            }
+            /* Timer settings now use vertical layout by default */
             
             .music-panel,
             .focus-streak {
@@ -7739,7 +7971,7 @@
             top: 50px;
             left: 0;
             right: 0;
-            height: 40px;
+            height: 60px;
             background: linear-gradient(145deg, #2c3e50, #34495e);
             border-bottom: 2px solid #f39c12;
             display: flex;
@@ -8558,15 +8790,65 @@
             width: 100vw;
             height: 100vh;
             background-image: url('assets/isometric_garden.png');
-            background-size: 130%; /* Zoom to 130% to show center of image */
+            background-size: 130%; /* Zoom to 130% while covering full screen */
             background-position: center center; /* Center the image */
             background-repeat: no-repeat; /* Don't repeat the image */
             background-color: #87ceeb; /* Fallback color if image fails to load */
+            background-attachment: fixed; /* Keep background fixed during scaling */
             cursor: grab;
         }
         
         #game-container:active {
             cursor: grabbing;
+        }
+        
+        /* Panel toggle buttons - visible on all screen sizes */
+        .panel-toggle {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #f39c12;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s ease;
+        }
+        
+        .panel-toggle:hover {
+            background: #e67e22;
+        }
+        
+        .panel-toggle:active {
+            transform: scale(0.95);
+            background: #d35400;
+        }
+        
+        /* Collapsed panel styles for all screen sizes */
+        .ui-panel.collapsed {
+            height: 40px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .ui-panel.collapsed .panel-content {
+            display: none;
+        }
+        
+        .ui-panel.collapsed h3 {
+            margin: 0;
+            font-size: 12px;
+            color: #f39c12;
         }
         
         /* Canvas scaling transitions for Focus Mode */
@@ -8767,6 +9049,10 @@
             font-size: 9px;
             backdrop-filter: blur(5px);
             z-index: 1000;
+            width: 200px; /* Standardized width for all panels */
+            box-sizing: border-box;
+            max-height: calc(100vh - 20px); /* Ensure panels don't exceed viewport */
+            overflow-y: auto; /* Add scrolling if content is too tall */
         }
         
         .ui-panel h3 {
@@ -8780,7 +9066,7 @@
         
         /* Resources Panel */
         #resources-panel {
-            top: 150px;
+            top: 180px; /* Below top nav bar (50px) + restart button (100px) + clearance */
             left: 10px;
             width: 180px;
         }
@@ -8794,7 +9080,7 @@
         
         /* Weather Panel */
         #weather-panel {
-            bottom: 410px;
+            top: 180px; /* Below top nav bar (50px) + focus mode button (60px) + clearance, align with resources panel */
             right: 10px;
             width: 200px;
         }
@@ -8899,7 +9185,7 @@
         
         /* Inventory Panel */
         #inventory-panel {
-            top: 320px;
+            top: 270px;
             left: 10px;
             width: 180px;
         }
@@ -9642,7 +9928,7 @@
         /* Focus Mode Button */
         .focus-mode-button {
             position: fixed;
-            top: 60px;
+            top: 120px; /* Increased clearance below top nav bar (50px) + more margin */
             right: 20px; /* Moved to top-right for better accessibility */
             background: linear-gradient(145deg, #8e44ad, #9b59b6);
             border: 2px solid #9b59b6;
@@ -9681,8 +9967,8 @@
         /* Restart Button */
         .restart-button {
             position: fixed;
-            top: 100px;
-            left: 10px;
+            top: 120px; /* Increased clearance below top nav bar (50px) + more margin, align with focus mode button */
+            left: 20px; /* Align with focus mode button margin */
             background: linear-gradient(145deg, #e74c3c, #c0392b);
             border: 2px solid #e74c3c;
             color: white;
@@ -10365,34 +10651,58 @@
         
         /* Timer Settings */
         .timer-settings {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-            margin: 20px 0;
-            flex-wrap: wrap;
+            display: grid !important;
+            grid-template-columns: 1fr 1fr 1fr !important;
+            gap: 10px !important;
+            margin: 20px auto !important;
+            width: 300px !important;
+            align-items: start !important;
         }
         
         .setting-group {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 5px;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 6px !important;
+            background: rgba(52, 73, 94, 0.8) !important;
+            border: 1px solid #f39c12 !important;
+            border-radius: 6px !important;
+            padding: 10px 5px !important;
+            height: 60px !important;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3) !important;
+            transition: all 0.2s ease !important;
+        }
+        
+        .setting-group:hover {
+            border-color: #f39c12;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transform: translateY(-2px);
         }
         
         .setting-group label {
-            font-size: 10px;
-            color: #bdc3c7;
+            font-size: 8px !important;
+            color: #bdc3c7 !important;
+            font-weight: normal !important;
+            text-align: center !important;
+            margin: 0 !important;
+            line-height: 1.1 !important;
+            white-space: nowrap !important;
         }
         
         .setting-group input {
-            background: #34495e;
-            border: 1px solid #2c3e50;
-            color: white;
-            padding: 5px;
-            border-radius: 4px;
-            width: 60px;
-            text-align: center;
-            font-family: inherit;
+            background: #34495e !important;
+            border: 1px solid #2c3e50 !important;
+            color: white !important;
+            padding: 3px !important;
+            border-radius: 3px !important;
+            width: 45px !important;
+            height: 24px !important;
+            text-align: center !important;
+            font-family: inherit !important;
+            font-size: 11px !important;
+            font-weight: bold !important;
+            box-sizing: border-box !important;
         }
         
         /* Music Panel */
@@ -10741,10 +11051,7 @@
                 gap: 10px;
             }
             
-            .timer-settings {
-                flex-direction: column;
-                gap: 15px;
-            }
+            /* Timer settings now use vertical layout by default */
             
             .music-panel,
             .focus-streak {
@@ -10805,7 +11112,7 @@
             top: 50px;
             left: 0;
             right: 0;
-            height: 40px;
+            height: 60px;
             background: linear-gradient(145deg, #2c3e50, #34495e);
             border-bottom: 2px solid #f39c12;
             display: flex;
@@ -11706,7 +12013,7 @@
     <!-- FOCUS MODE TAB NAVIGATION -->
     <div class="focus-tab-navigation">
                                 <button class="focus-tab-button active" onclick="switchToGarden()" id="focus-tab-garden">
-                            🌱 Garden
+                            Garden
                         </button>
         <button class="focus-tab-button" onclick="switchToFocus()" id="focus-tab-focus">
             <img src="assets/focus.png" alt="Focus" style="width: 16px; height: 16px; vertical-align: middle;"> Focus Mode
@@ -11747,17 +12054,17 @@
             
             <div class="focus-section">
                 <div class="timer-settings">
-                    <div class="setting-group" style="width: 80px;">
-                        <label style="font-size: 10px; color: #bdc3c7; text-align: center; width: 100%; white-space: nowrap; margin-bottom: 2px;">Focus (min)</label>
-                        <input type="number" id="focus-duration" value="25" min="1" max="120" onchange="updateTimerSettings()" style="width: 100%; height: 30px; box-sizing: border-box;">
+                    <div class="setting-group">
+                        <label>Focus</label>
+                        <input type="number" id="focus-duration" value="25" min="1" max="120" onchange="updateTimerSettings()">
                     </div>
-                    <div class="setting-group" style="width: 80px;">
-                        <label style="font-size: 10px; color: #bdc3c7; text-align: center; width: 100%; white-space: nowrap; margin-bottom: 2px;">Break (min)</label>
-                        <input type="number" id="break-duration" value="5" min="1" max="30" onchange="updateTimerSettings()" style="width: 100%; height: 30px; box-sizing: border-box;">
+                    <div class="setting-group">
+                        <label>Break</label>
+                        <input type="number" id="break-duration" value="5" min="1" max="30" onchange="updateTimerSettings()">
                     </div>
-                    <div class="setting-group" style="width: 80px;">
-                        <label style="font-size: 10px; color: #bdc3c7; text-align: center; width: 100%; white-space: nowrap; margin-bottom: 2px;">Long Break (min)</label>
-                        <input type="number" id="long-break-duration" value="15" min="1" max="60" onchange="updateTimerSettings()" style="width: 100%; height: 30px; box-sizing: border-box;">
+                    <div class="setting-group">
+                        <label>Long Break</label>
+                        <input type="number" id="long-break-duration" value="15" min="1" max="60" onchange="updateTimerSettings()">
                     </div>
                 </div>
             </div>
@@ -11830,7 +12137,7 @@
             </div>
 
             <div class="focus-section">
-                <h3>🎮 Focus Controls</h3>
+                <h3>Focus Controls</h3>
                 <div class="focus-controls">
                     <button class="focus-button" onclick="startFocusSession()">🚀 Start Focus Session</button>
                 </div>
@@ -11870,12 +12177,12 @@
 
     <!-- Back to Game Button (only visible in focus tab) -->
                     <button class="back-to-game-button" id="back-to-game-button" onclick="switchToGarden()" style="display: none;">
-                    🌱 Back to Garden
+                    Back to Garden
                 </button>
 
     <!-- Focus Mode Button -->
     <button class="focus-mode-button" id="focus-mode-button">
-        🎯 Focus Mode
+        Focus Mode
     </button>
     
     <!-- Center Timer Button -->
@@ -11922,15 +12229,15 @@
             <div class="main-timer-settings">
                 <div class="main-setting-row">
                     <div class="main-setting-group">
-                        <label>Focus (min)</label>
+                        <label>Focus</label>
                         <input type="number" id="main-focus-duration" value="25" min="1" max="120" onchange="onMainTimerSettingChange()">
                     </div>
                     <div class="main-setting-group">
-                        <label>Break (min)</label>
+                        <label>Break</label>
                         <input type="number" id="main-break-duration" value="5" min="1" max="30" onchange="onMainTimerSettingChange()">
                     </div>
                     <div class="main-setting-group">
-                        <label>Long Break (min)</label>
+                        <label>Long Break</label>
                         <input type="number" id="main-long-break-duration" value="15" min="1" max="60" onchange="onMainTimerSettingChange()">
                     </div>
                 </div>
@@ -11953,12 +12260,17 @@
             🔄 Restart Game
         </button>
         
+        <!-- Shop Icon (Bottom-Right) -->
+        <div id="shop-icon-right" class="shop-icon-right" onclick="toggleShopPanel()">
+            <img src="assets/shop.png" alt="Garden Shop" />
+        </div>
+        
         <!-- Focus Mode Test Button - REMOVED -->
     
     <!-- Plant Condition Hover Panel -->
     <div class="plant-condition-panel" id="plant-condition-panel" style="display: none;">
         <div class="panel-header">
-            <span class="plant-icon" id="hover-plant-icon">🌱</span>
+            <span class="plant-icon" id="hover-plant-icon"></span>
             <span class="plant-name" id="hover-plant-name">Plant</span>
             <span class="plant-stage" id="hover-plant-stage">Stage 1</span>
         </div>
@@ -12045,7 +12357,7 @@
     <!-- Intro Pop-ups -->
     <div id="intro-popup-1" class="intro-popup" style="display: none;">
         <div class="popup-content">
-            <h2>🌱 Welcome to Growtopia!</h2>
+            <h2>Welcome to Growtopia!</h2>
             <p>
                             Welcome, gardener! You've inherited a magical plot of land where crops grow with the rhythm of nature and weather.
             Your goal is to build a thriving garden by planting seeds, caring for your crops, and expanding your agricultural empire.
@@ -12060,7 +12372,7 @@
     
     <div id="intro-popup-2" class="intro-popup" style="display: none;">
         <div class="popup-content">
-            <h2>🎮 How to Get Started</h2>
+            <h2>How to Get Started</h2>
             <p>
                 <strong>Basic Controls:</strong><br>
                 • Click any empty green tile to plant seeds<br>
@@ -12075,42 +12387,16 @@
                 • Sprinklers auto-water nearby tiles<br>
                 • Check plant status panel for crop health
             </p>
-                            <button class="popup-button" onclick="startGame()">Start Gardening! 🌱</button>
+                            <button class="popup-button" onclick="startGame()">Start Gardening!</button>
         </div>
     </div>
     
     <!-- Main UI Panels -->
     
-    <!-- NEW: Tool Selection Panel (HIDDEN - now integrated into inventory) -->
-    <div id="tool-panel" class="ui-panel" style="top: 320px; left: 10px; width: 180px; display: none;">
-                    <h3><img src="assets/shovel.png" alt="Tools" style="width: 16px; height: 16px; vertical-align: middle;"> Tools</h3>
-        <div class="tool-section">
-            <button class="tool-button" onclick="selectTool('watering_can')" id="tool-watering-can">
-                🪣 Watering Can <span id="tool-watering-count">1</span>
-            </button>
-            <button class="tool-button" onclick="selectTool('pesticide')" id="tool-pesticide">
-                🧪 Pesticide <span id="tool-pesticide-count">0</span>
-            </button>
-            <button class="tool-button" onclick="selectTool('solar_lamp')" id="tool-solar-lamp">
-                <img src="assets/sun.png" alt="Solar Lamp" style="width: 16px; height: 16px; vertical-align: middle;"> Solar Lamp <span id="tool-solar-count">0</span>
-            </button>
-            <button class="tool-button" onclick="selectTool('shovel')" id="tool-shovel">
-                🗡️ Shovel <span id="tool-shovel-count">1</span>
-            </button>
-        </div>
-        <div class="tool-info">
-            <p style="font-size: 8px; margin: 5px 0;">
-                <strong>Selected:</strong> <span id="selected-tool-display">None</span>
-            </p>
-            <p style="font-size: 7px; margin: 0; color: #777;">
-                Click tool, then click crop to use<br/>
-                Shovel: Select + left-click to dig up trees
-            </p>
-        </div>
-    </div>
+
     
     <!-- Resources Panel -->
-    <div id="resources-panel" class="ui-panel" style="top: 150px;">
+    <div id="resources-panel" class="ui-panel" style="top: 150px; left: 10px; width: 200px;">
         <h3>Garden Resources</h3>
         <div class="resource-item">
                             <span><img src="assets/coin.png" alt="Coin" style="width: 20px; height: 20px; vertical-align: middle;"> Coins:</span>
@@ -12134,7 +12420,7 @@
     </div>
     
     <!-- Enhanced Live Weather Panel -->
-    <div id="weather-panel" class="ui-panel" style="bottom: 410px; right: 10px; width: 200px;">
+    <div id="weather-panel" class="ui-panel" style="top: 150px; right: 10px; width: 200px;">
         <h3>Live Weather</h3>
         <div class="weather-info">
             <div class="weather-icon" id="weather-icon"><img src="assets/sun.png" alt="Sun" style="width: 24px; height: 24px;"></div>
@@ -12224,18 +12510,13 @@
             <div style="font-size: 5px; color: #7f8c8d; text-align: center; margin-top: 3px;">
                 Choose weather • Affects plant growth
             </div>
-            <div style="margin-top: 4px;">
-                <button onclick="runWeatherDemo()" 
-                        style="width: 100%; padding: 3px; font-size: 6px; background: #9b59b6; color: white; border: none; border-radius: 2px; cursor: pointer;">
-                    Weather Cycle Demo
-                </button>
-            </div>
+
         </div>
     </div>
     
     <!-- Plant Status Panel -->
-    <div id="plant-status-panel" class="ui-panel" style="top: 180px; right: 10px; width: 150px; display: none;">
-        <h3>🌱 Plant Status</h3>
+    <div id="plant-status-panel" class="ui-panel" style="top: 180px; right: 10px; width: 200px; display: none;">
+        <h3>Plant Status</h3>
         <div id="plant-status-list">
             <div style="text-align: center; color: #95a5a6; font-size: 8px;">
                 No crops planted yet
@@ -12244,7 +12525,7 @@
     </div>
     
         <!-- Enhanced Inventory Panel -->
-    <div id="inventory-panel" class="ui-panel" style="top: 320px; left: 10px; width: 180px;">
+    <div id="inventory-panel" class="ui-panel" style="top: 370px; left: 10px; width: 200px;">
         <h3>Inventory</h3>
         
         <div class="inventory-section">
@@ -12320,8 +12601,9 @@
         </div>
     </div>
     
-        <!-- Shop Panel -->
-    <div id="shop-panel" class="ui-panel" style="bottom: 10px; right: 10px; width: 200px; height: 250px;">
+        <!-- Shop Panel (Hidden by default, shown when shop icon is clicked) -->
+    <div id="shop-panel" class="ui-panel shop-panel-centered" style="display: none;">
+        <button class="shop-close-button" onclick="hideShopPanel()" title="Close Shop">×</button>
         <h3>Garden Shop</h3>
         
         <div class="shop-category">
@@ -12348,7 +12630,7 @@
     <!-- Intro Panel -->
     <div class="intro-panel" id="intro-panel">
         <div class="intro-content">
-            <div class="intro-title">🌱 Welcome to Growtopia! 🌱</div>
+            <div class="intro-title">Welcome to Growtopia!</div>
             <div class="intro-rules">
                 <h3>How to Play:</h3>
                 <ul>
@@ -15123,6 +15405,321 @@
             updateWeatherUI();
             updateShopButtons(); // NEW: Update shop button states when coins change
         }
+
+        // =============================================================================
+        // RESPONSIVE UI FUNCTIONS
+        // =============================================================================
+        
+        function initializeResponsiveUI() {
+            // Add toggle buttons to panels on mobile
+            if (window.innerWidth <= 768) {
+                addPanelToggleButtons();
+                // Auto-collapse panels on small screens
+                autoCollapseOnSmallScreens();
+            }
+            
+            // Add event listeners for responsive changes
+            window.addEventListener('resize', handleResponsiveResize);
+            window.addEventListener('orientationchange', handleOrientationChange);
+        }
+        
+        function autoCollapseOnSmallScreens() {
+            const screenWidth = window.innerWidth;
+            const screenHeight = window.innerHeight;
+            
+            // Auto-collapse based on screen size
+            if (screenWidth <= 480) {
+                // Very small screens - collapse most panels
+                collapsePanel('weather-panel');
+                collapsePanel('narrative-panel');
+                collapsePanel('inventory-panel');
+            } else if (screenWidth <= 640) {
+                // Small screens - collapse some panels
+                collapsePanel('weather-panel');
+                collapsePanel('narrative-panel');
+            } else if (screenWidth <= 768) {
+                // Mobile screens - collapse weather and narrative
+                collapsePanel('weather-panel');
+                collapsePanel('narrative-panel');
+            }
+            
+            // Also consider screen height for landscape
+            if (screenHeight <= 500 && screenWidth <= 900) {
+                collapsePanel('weather-panel');
+                collapsePanel('narrative-panel');
+                collapsePanel('inventory-panel');
+            }
+        }
+        
+        function addPanelToggleButtons() {
+            const panels = [
+                {id: 'resources-panel', title: '🪙 Garden Resources'},
+                // {id: 'shop-panel', title: '🏪 Shop'}, // Removed - now controlled by shop icon
+                {id: 'inventory-panel', title: '🎒 Inventory'},
+                {id: 'weather-panel', title: '⛅ Live Weather'},
+                {id: 'narrative-panel', title: '📖 Soft Narrative'}
+            ];
+            
+            panels.forEach(panelInfo => {
+                const panel = document.getElementById(panelInfo.id);
+                if (panel && !panel.querySelector('.panel-toggle')) {
+                    // Add data-title attribute for fallback title display
+                    panel.setAttribute('data-title', panelInfo.title);
+                    
+                    // Create toggle button
+                    const toggleButton = document.createElement('button');
+                    toggleButton.className = 'panel-toggle';
+                    toggleButton.innerHTML = '−';
+                    toggleButton.onclick = () => togglePanel(panelInfo.id);
+                    
+                    // Extract heading and wrap only the rest of the content
+                    const heading = panel.querySelector('h3') || panel.querySelector('h2') || panel.querySelector('h4');
+                    const content = panel.innerHTML;
+                    panel.innerHTML = '';
+                    
+                    // Add toggle button first
+                    panel.appendChild(toggleButton);
+                    
+                    // If there's a heading, add it directly to the panel (not wrapped)
+                    if (heading) {
+                        const headingClone = heading.cloneNode(true);
+                        panel.appendChild(headingClone);
+                        
+                        // Create content div with everything except the heading
+                        const tempDiv = document.createElement('div');
+                        tempDiv.innerHTML = content;
+                        const tempHeading = tempDiv.querySelector('h3') || tempDiv.querySelector('h2') || tempDiv.querySelector('h4');
+                        if (tempHeading) {
+                            tempHeading.remove();
+                        }
+                        
+                        const contentDiv = document.createElement('div');
+                        contentDiv.className = 'panel-content';
+                        contentDiv.innerHTML = tempDiv.innerHTML;
+                        panel.appendChild(contentDiv);
+                    } else {
+                        // No heading found, wrap all content
+                        const contentDiv = document.createElement('div');
+                        contentDiv.className = 'panel-content';
+                        contentDiv.innerHTML = content;
+                        panel.appendChild(contentDiv);
+                    }
+                }
+            });
+        }
+        
+        function togglePanel(panelId) {
+            const panel = document.getElementById(panelId);
+            const toggleButton = panel.querySelector('.panel-toggle');
+            
+            if (panel.classList.contains('collapsed')) {
+                expandPanel(panelId);
+                toggleButton.innerHTML = '−';
+            } else {
+                collapsePanel(panelId);
+                toggleButton.innerHTML = '+';
+            }
+        }
+        
+        function toggleShopPanel() {
+            console.log('🛒 Shop icon clicked!');
+            const shopPanel = document.getElementById('shop-panel');
+            const isVisible = shopPanel.style.display !== 'none';
+            
+            if (isVisible) {
+                // Hide the shop panel and backdrop
+                hideShopPanel();
+            } else {
+                // Show the shop panel with backdrop
+                showShopPanel();
+            }
+        }
+        
+        function showShopPanel() {
+            const shopPanel = document.getElementById('shop-panel');
+            
+            // Create backdrop if it doesn't exist
+            let backdrop = document.getElementById('shop-backdrop');
+            if (!backdrop) {
+                backdrop = document.createElement('div');
+                backdrop.id = 'shop-backdrop';
+                backdrop.className = 'shop-backdrop';
+                backdrop.onclick = hideShopPanel; // Click backdrop to close
+                document.body.appendChild(backdrop);
+            }
+            
+            // Show backdrop and panel
+            backdrop.style.display = 'block';
+            shopPanel.style.display = 'block';
+            console.log('🛒 Shop panel shown (centered)');
+        }
+        
+        function hideShopPanel() {
+            const shopPanel = document.getElementById('shop-panel');
+            const backdrop = document.getElementById('shop-backdrop');
+            
+            // Hide panel and backdrop
+            shopPanel.style.display = 'none';
+            if (backdrop) {
+                backdrop.style.display = 'none';
+            }
+            console.log('🛒 Shop panel hidden');
+        }
+        
+        function collapsePanel(panelId) {
+            const panel = document.getElementById(panelId);
+            panel.classList.add('collapsed');
+            const toggleButton = panel.querySelector('.panel-toggle');
+            if (toggleButton) toggleButton.innerHTML = '+';
+        }
+        
+        function expandPanel(panelId) {
+            const panel = document.getElementById(panelId);
+            panel.classList.remove('collapsed');
+            const toggleButton = panel.querySelector('.panel-toggle');
+            if (toggleButton) toggleButton.innerHTML = '−';
+        }
+        
+        function handleResponsiveResize() {
+            const isMobile = window.innerWidth <= 768;
+            
+            // Always add toggle buttons on all screen sizes
+            addPanelToggleButtons();
+            
+            if (isMobile) {
+                // Auto-collapse panels based on new screen size
+                autoCollapseOnSmallScreens();
+            } else {
+                // On desktop, keep buttons but expand all panels by default
+                const panels = document.querySelectorAll('.ui-panel');
+                panels.forEach(panel => {
+                    panel.classList.remove('collapsed');
+                    const toggleButton = panel.querySelector('.panel-toggle');
+                    if (toggleButton) {
+                        toggleButton.innerHTML = '−';
+                    }
+                });
+            }
+            
+            // Update responsive scaling
+            updateResponsiveScaling();
+        }
+        
+        function handleOrientationChange() {
+            setTimeout(() => {
+                handleResponsiveResize();
+                // Recalculate positions after orientation change
+                updateResponsiveScaling();
+            }, 100);
+        }
+        
+        // Enhanced touch interactions for mobile
+        function initializeTouchInteractions() {
+            const canvas = document.getElementById('defaultCanvas0');
+            if (!canvas) return;
+            
+            // Prevent default touch behaviors that interfere with game
+            canvas.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+            }, { passive: false });
+            
+            canvas.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+            }, { passive: false });
+            
+            canvas.addEventListener('touchend', (e) => {
+                e.preventDefault();
+            }, { passive: false });
+            
+            // Add haptic feedback for supported devices
+            if ('vibrate' in navigator) {
+                // Add vibration feedback for interactions
+                window.mobileVibrate = (pattern = [10]) => {
+                    navigator.vibrate(pattern);
+                };
+            } else {
+                window.mobileVibrate = () => {}; // No-op for unsupported devices
+            }
+        }
+        
+        // Mobile-optimized plant interaction
+        function handleMobilePlantInteraction(worldX, worldY) {
+            if (worldX < 0 || worldX >= CONFIG.GRID_WIDTH || worldY < 0 || worldY >= CONFIG.GRID_HEIGHT) {
+                return false;
+            }
+            
+            const tile = gameState.grid[worldY][worldX];
+            
+            // Provide haptic feedback
+            if (window.mobileVibrate) {
+                window.mobileVibrate([5]); // Short vibration
+            }
+            
+            // Show mobile-friendly interaction feedback
+            showMobileInteractionFeedback(worldX, worldY);
+            
+            return handlePlantInteraction(worldX, worldY);
+        }
+        
+        function showMobileInteractionFeedback(worldX, worldY) {
+            const screenPos = worldToScreen(worldX, worldY);
+            
+            // Create visual feedback element
+            const feedback = document.createElement('div');
+            feedback.style.position = 'absolute';
+            feedback.style.left = screenPos.x + 'px';
+            feedback.style.top = screenPos.y + 'px';
+            feedback.style.width = '30px';
+            feedback.style.height = '30px';
+            feedback.style.borderRadius = '50%';
+            feedback.style.backgroundColor = 'rgba(52, 152, 219, 0.3)';
+            feedback.style.border = '2px solid rgba(52, 152, 219, 0.8)';
+            feedback.style.transform = 'translate(-50%, -50%)';
+            feedback.style.pointerEvents = 'none';
+            feedback.style.zIndex = '2000';
+            feedback.style.animation = 'touchFeedback 0.3s ease-out forwards';
+            
+            document.body.appendChild(feedback);
+            
+            setTimeout(() => {
+                if (feedback.parentNode) {
+                    feedback.parentNode.removeChild(feedback);
+                }
+            }, 300);
+        }
+        
+        // Enhanced responsive scaling that considers both screen size and grid alignment
+        function updateResponsiveCanvasAndGrid() {
+            const containerWidth = window.innerWidth;
+            const containerHeight = window.innerHeight;
+            
+            // Calculate scale factor based on screen size
+            let scaleFactor = 1.0;
+            
+            if (containerWidth <= 768) {
+                // Mobile: scale down to fit more of the game
+                scaleFactor = Math.min(containerWidth / 1000, containerHeight / 700) * 0.8;
+            } else if (containerWidth <= 1024) {
+                // Tablet: moderate scaling
+                scaleFactor = Math.min(containerWidth / 1000, containerHeight / 700) * 0.9;
+            }
+            
+            // Update tile sizes to maintain grid alignment with background
+            CONFIG.TILE_WIDTH = CONFIG.BASE_TILE_WIDTH * scaleFactor;
+            CONFIG.TILE_HEIGHT = CONFIG.BASE_TILE_HEIGHT * scaleFactor;
+            
+            // Update grid offset to keep it centered with full-cover background
+            // Adjust positioning to work well with cover background sizing
+            CONFIG.GRID_OFFSET_X = containerWidth / 2;
+            CONFIG.GRID_OFFSET_Y = containerHeight / 2;
+            
+            // Store current scale factor for other functions to use
+            window.currentScaleFactor = scaleFactor;
+            
+            console.log(`📐 Responsive scaling updated: ${scaleFactor.toFixed(3)}x for ${containerWidth}x${containerHeight} screen`);
+            
+            return scaleFactor;
+        }
         
         function updateResourcesUI() {
             document.getElementById('coins').textContent = gameState.coins;
@@ -15692,6 +16289,18 @@
         
 
         
+        // p5.js touch support
+        function touchStarted() {
+            // Prevent default touch behavior
+            if (touches.length > 0) {
+                // Use the same logic as mousePressed but with touch coordinates
+                mouseX = touches[0].x;
+                mouseY = touches[0].y;
+                mousePressed();
+                return false; // Prevent default
+            }
+        }
+        
         function mousePressed() {
             if (!gameState.gameStarted) return;
             
@@ -15719,6 +16328,12 @@
             // Use transformed coordinates for game logic
             const worldPos = screenToWorld(transformedCoords.x, transformedCoords.y);
             console.log('🌎 World position:', worldPos);
+            
+            // Use mobile-optimized interaction on mobile devices
+            if (window.innerWidth <= 768) {
+                const success = handleMobilePlantInteraction(worldPos.x, worldPos.y);
+                if (success) return;
+            }
             
             // Handle plant menu
             if (gameState.showPlantMenu) {
@@ -18819,6 +19434,14 @@
             // Initialize responsive scaling system
             calculateResponsiveScale();
             
+            // Initialize responsive UI features
+            initializeResponsiveUI();
+            
+            // Initialize touch interactions for mobile
+            setTimeout(() => {
+                initializeTouchInteractions();
+            }, 100);
+            
             initializeGrid();
             updateAllUI();
             updateWeatherUI();
@@ -18914,6 +19537,7 @@
             // Debug logging (only first few frames)
             if (frameCount <= 3) {
                 console.log(`🎬 Draw() frame ${frameCount}, gameStarted: ${gameState.gameStarted}`);
+                console.log(`🌱 Total crops in game:`, gameState.grid.flat().filter(tile => tile.crop).length);
             }
             
             if (gameState.gameStarted) {
@@ -18944,7 +19568,7 @@
                 fill(255);
                 textAlign(CENTER);
                 textSize(16);
-                text('🌱 Growtopia Garden', width/2, height/2);
+                text('Growtopia Garden', width/2, height/2);
             }
         }
         
@@ -19221,12 +19845,11 @@
         function hideNormalUIPanels() {
             console.log('🫥 Hiding normal UI panels...');
             const normalPanels = [
-                'tool-panel',
                 'resources-panel', 
                 'weather-panel',
                 'plant-status-panel',
-                'inventory-panel',
-                'shop-panel'
+                'inventory-panel'
+                // 'shop-panel' - removed, now controlled by shop icon
                 // 'narrative-panel' - removed, now using speech bubble
             ];
             
@@ -19239,6 +19862,16 @@
                     console.log(`❌ Panel not found: ${panelId}`);
                 }
             });
+            
+            // Hide shop icon in focus mode
+            const shopIcon = document.getElementById('shop-icon-right');
+            if (shopIcon) {
+                shopIcon.style.display = 'none';
+                console.log('✅ Hidden shop icon');
+            }
+            
+            // Also hide shop panel if it's open
+            hideShopPanel();
             
             // Hide top UI bar
             const topBar = document.querySelector('.top-ui-bar');
@@ -19254,12 +19887,11 @@
         function showNormalUIPanels() {
             console.log('👁️ Showing normal UI panels...');
             const normalPanels = [
-                'tool-panel',
                 'resources-panel',
                 'weather-panel', 
                 'plant-status-panel',
-                'inventory-panel',
-                'shop-panel'
+                'inventory-panel'
+                // 'shop-panel' - removed, now controlled by shop icon
                 // 'narrative-panel' - removed, now using speech bubble
             ];
             
@@ -19272,6 +19904,13 @@
                     console.log(`❌ Panel not found: ${panelId}`);
                 }
             });
+            
+            // Show shop icon when returning to normal mode
+            const shopIcon = document.getElementById('shop-icon-right');
+            if (shopIcon) {
+                shopIcon.style.display = 'flex';
+                console.log('✅ Shown shop icon');
+            }
             
             // Show top UI bar
             const topBar = document.querySelector('.top-ui-bar');
@@ -19585,7 +20224,7 @@
                 
                 console.log('🌙 Switched to night background at 100% scale, scaled game elements to 77%');
             } else {
-                // Switch back to day background at 130% scale
+                // Switch back to day background at 130% zoom
                 gameContainer.style.backgroundImage = "url('assets/isometric_garden.png')";
                 gameContainer.style.backgroundSize = "130%";
                 
@@ -19595,7 +20234,7 @@
                     canvas.style.transformOrigin = "center center";
                 }
                 
-                console.log('☀️ Switched to day background at 130% scale, restored game elements to 100%');
+                console.log('☀️ Switched to day background at 130% zoom, restored game elements to 100%');
             }
         }
         
@@ -21412,6 +22051,9 @@
                 // Initialize center timer
                 initializeCenterTimer();
                 
+                // Always add toggle buttons to panels
+                addPanelToggleButtons();
+                
             } catch (error) {
                 console.error('🎭 ERROR in DOMContentLoaded:', error);
             }
@@ -22103,7 +22745,7 @@
                     color: #ecf0f1;
                     font-size: 14px;
                     margin-bottom: 5px;
-                ">Focus Duration (min)</label>
+                ">Focus Duration</label>
                 <input type="number" id="center-focus-duration" value="25" min="1" max="60" onchange="updateCenterTimerSettings()" style="
                     width: 100%;
                     padding: 8px;
@@ -22121,7 +22763,7 @@
                     color: #ecf0f1;
                     font-size: 14px;
                     margin-bottom: 5px;
-                ">Break Duration (min)</label>
+                ">Break Duration</label>
                 <input type="number" id="center-break-duration" value="5" min="1" max="30" onchange="updateCenterTimerSettings()" style="
                     width: 100%;
                     padding: 8px;
@@ -22139,7 +22781,7 @@
                     color: #ecf0f1;
                     font-size: 14px;
                     margin-bottom: 5px;
-                ">Long Break (min)</label>
+                ">Long Break</label>
                 <input type="number" id="center-long-break-duration" value="15" min="5" max="60" onchange="updateCenterTimerSettings()" style="
                     width: 100%;
                     padding: 8px;
@@ -22299,7 +22941,7 @@
             border-radius: 18px;
             padding: 16px 20px;
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-            z-index: 999;
+            z-index: 15000;
             display: none;
             border: 3px solid rgba(102, 126, 234, 0.3);
             font-family: 'Press Start 2P', cursive;
@@ -22600,6 +23242,847 @@
         .focus-mode-overlay {
             background: transparent !important;
             backdrop-filter: none !important;
+        }
+
+        /* Hide tool count numbers in inventory panel */
+        #tool-watering-count, #tool-pesticide-count, #tool-solar-count, #tool-shovel-count {
+            display: none !important;
+        }
+
+        /* Shop Icon (Bottom-Right Corner) */
+        .shop-icon-right {
+            position: fixed; /* Use fixed positioning to ignore parent containers */
+            bottom: 15px !important; /* Move up from bottom */
+            right: 25px !important; /* Move left from right edge */
+            margin: 0 !important;
+            padding: 0 !important;
+            transform: none; /* Remove vertical centering */
+            width: 320px;
+            height: 320px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            z-index: 10000; /* Higher z-index to ensure it's on top */
+            display: flex;
+            box-sizing: border-box; /* Include borders in size calculations */
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .shop-icon-right:hover {
+            transform: translateY(-5px) scale(1.05);
+        }
+        
+        .shop-icon-right:active {
+            transform: translateY(0) scale(0.98);
+        }
+        
+        .shop-icon-right img {
+            width: 200px;
+            height: 200px;
+            margin: 0 !important;
+            padding: 0 !important;
+            border: none !important;
+            filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.4));
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+        
+        /* Centered Shop Panel */
+        .shop-panel-centered {
+            position: fixed !important;
+            top: 50% !important;
+            left: 50% !important;
+            transform: translate(-50%, -50%) !important;
+            width: 300px !important;
+            max-width: 90vw !important;
+            height: auto !important;
+            max-height: 80vh !important;
+            overflow-y: auto !important;
+            z-index: 2000 !important; /* Higher than other UI elements */
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+            border: 3px solid #f39c12 !important;
+            background: rgba(44, 62, 80, 0.98) !important;
+            animation: shopPanelSlideIn 0.3s ease-out !important;
+        }
+        
+        /* Shop panel close button */
+        .shop-close-button {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2001;
+            transition: all 0.2s ease;
+        }
+        
+        .shop-close-button:hover {
+            background: #c0392b;
+            transform: scale(1.1);
+        }
+        
+        /* Animation for shop panel */
+        @keyframes shopPanelSlideIn {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+        
+        /* Add backdrop overlay when shop panel is open */
+        .shop-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1500;
+            backdrop-filter: blur(3px);
+        }
+
+        /* ===== RESPONSIVE DESIGN ENHANCEMENTS ===== */
+        
+        /* Mobile Styles (default) */
+        @media (max-width: 768px) {
+            /* Top UI Bar adjustments */
+            .top-ui-bar {
+                height: 60px !important;
+                padding: 0 10px !important;
+                font-size: 8px !important;
+            }
+            
+            .weather-icon {
+                font-size: 16px !important;
+            }
+            
+            .coin-counter {
+                font-size: 10px !important;
+            }
+            
+            .xp-bar {
+                width: 80px !important;
+                height: 4px !important;
+            }
+            
+            /* Adjust panels for mobile - smaller and better positioned */
+            .ui-panel {
+                font-size: 8px !important;
+                padding: 8px !important;
+                width: 180px !important;
+                max-height: 35vh !important;
+                overflow-y: auto !important;
+                transition: all 0.3s ease !important;
+            }
+            
+            /* Ensure proper spacing between resources and inventory panels on mobile */
+            #resources-panel {
+                top: 80px !important;
+                left: 5px !important;
+            }
+            
+            #inventory-panel {
+                top: 280px !important;
+                left: 5px !important;
+            }
+            
+            #weather-panel {
+                top: 80px !important;
+                right: 5px !important;
+            }
+            
+            #shop-panel {
+                bottom: 10px !important;
+                right: 5px !important;
+                height: 200px !important;
+            }
+            
+            /* Collapse functionality disabled for larger screens - panels stay expanded */
+            
+
+            
+            /* Ensure ALL titles are visible when collapsed - match expanded panel h3 styling */
+            .ui-panel.collapsed h3,
+            .ui-panel.collapsed h2,
+            .ui-panel.collapsed .panel-title,
+            .ui-panel.collapsed > div:first-child,
+            .ui-panel.collapsed > span:first-child {
+                display: block !important;
+                margin: 0 !important;
+                padding: 8px 0 8px 8px !important;
+                font-size: 10px !important; /* Match expanded h3 font size */
+                font-weight: normal !important; /* Match expanded h3 font weight */
+                color: #f39c12 !important; /* Match expanded h3 color (golden) */
+                text-align: left !important; /* Different from expanded center alignment for space */
+                white-space: nowrap !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+                flex: 1 !important;
+                z-index: 2 !important;
+                border: none !important; /* Remove border for collapsed state */
+            }
+            
+            /* Fallback title display for panels without proper title elements */
+            .ui-panel.collapsed::before {
+                content: attr(data-title) !important;
+                display: block !important;
+                font-size: 10px !important; /* Match expanded h3 font size */
+                font-weight: normal !important; /* Match expanded h3 font weight */
+                color: #f39c12 !important; /* Match expanded h3 color (golden) */
+                padding: 8px 0 8px 8px !important;
+                flex: 1 !important;
+                position: absolute !important;
+                left: 0 !important;
+                top: 50% !important;
+                transform: translateY(-50%) !important;
+                z-index: 1 !important;
+                white-space: nowrap !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+                text-align: left !important;
+                border: none !important;
+            }
+            
+            .panel-toggle {
+                position: absolute !important;
+                top: 5px !important;
+                right: 5px !important;
+                background: #f39c12 !important;
+                color: white !important;
+                border: none !important;
+                border-radius: 3px !important;
+                width: 20px !important;
+                height: 20px !important;
+                font-size: 12px !important;
+                cursor: pointer !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                z-index: 1001 !important;
+            }
+            
+            /* Adjust panel positions for mobile - keep below top nav bar and buttons */
+            #resources-panel {
+                top: 140px !important; /* Below top nav bar (60px) + restart button (60px) + clearance */
+                left: 5px !important;
+                width: 140px !important;
+            }
+            
+            #shop-panel {
+                bottom: 5px !important;
+                right: 5px !important;
+                width: 160px !important;
+                height: 250px !important;
+            }
+            
+            #inventory-panel {
+                top: 180px !important;
+                left: 5px !important;
+                width: 140px !important;
+            }
+            
+            #weather-panel {
+                top: 140px !important; /* Below top nav bar (60px) + focus mode button (60px) + clearance, align with resources panel */
+                right: 5px !important;
+                width: 160px !important;
+            }
+            
+            #narrative-panel {
+                top: 240px !important; /* Move down to avoid overlap with weather panel */
+                right: 5px !important;
+                width: 140px !important;
+            }
+            
+            /* Background scaling for mobile - 130% zoom */
+            #game-container {
+                background-size: 130% !important;
+            }
+            
+            /* Zoom indicator adjustments */
+            .zoom-indicator {
+                font-size: 7px !important;
+                padding: 6px 8px !important;
+                bottom: 10px !important;
+                right: 10px !important;
+            }
+            
+            /* Focus mode adjustments */
+            .focus-mode-button {
+                font-size: 8px !important;
+                padding: 6px 10px !important;
+                top: 130px !important; /* Increased clearance below mobile nav bar (60px) + more margin */
+                right: 10px !important;
+            }
+            
+            .restart-button {
+                font-size: 8px !important;
+                padding: 6px 10px !important;
+                top: 130px !important; /* Increased clearance below mobile nav bar (60px) + more margin */
+                left: 10px !important;
+            }
+            
+            /* Shop Icon Bottom-Right mobile adjustments */
+            .shop-icon-right {
+                position: fixed !important;
+                width: 150px !important;
+                height: 150px !important;
+                bottom: 10px !important; /* Move up from bottom on mobile */
+                right: 15px !important; /* Move left from right edge on mobile */
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            
+            .shop-icon-right img {
+                width: 150px !important;
+                height: 150px !important;
+            }
+            
+            /* Centered Shop Panel mobile adjustments */
+            .shop-panel-centered {
+                width: 280px !important;
+                max-width: 95vw !important;
+                max-height: 85vh !important;
+                padding: 10px !important;
+                font-size: 8px !important;
+            }
+            
+            .shop-panel-centered h3 {
+                font-size: 10px !important;
+                margin-bottom: 8px !important;
+            }
+            
+            .shop-panel-centered .shop-button {
+                font-size: 7px !important;
+                padding: 6px !important;
+                margin: 2px 0 !important;
+                min-height: 30px !important;
+            }
+            
+            /* Touch-friendly button sizes */
+            .shop-button {
+                min-height: 35px !important;
+                font-size: 8px !important;
+                padding: 8px !important;
+                margin: 3px 0 !important;
+            }
+            
+            .tool-button {
+                min-height: 35px !important;
+                font-size: 8px !important;
+                padding: 8px !important;
+                margin: 3px 0 !important;
+            }
+            
+            /* Touch feedback */
+            .shop-button:active, .tool-button:active, .panel-toggle:active {
+                transform: scale(0.95) !important;
+                background-color: rgba(52, 152, 219, 0.8) !important;
+            }
+            
+            /* Touch feedback animation */
+            @keyframes touchFeedback {
+                0% {
+                    transform: translate(-50%, -50%) scale(0.5);
+                    opacity: 0.8;
+                }
+                50% {
+                    transform: translate(-50%, -50%) scale(1.2);
+                    opacity: 0.4;
+                }
+                100% {
+                    transform: translate(-50%, -50%) scale(1.5);
+                    opacity: 0;
+                }
+            }
+        }
+        
+        /* Tablet Styles */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .top-ui-bar {
+                height: 55px !important;
+                font-size: 9px !important;
+            }
+            
+            .focus-mode-button, .restart-button {
+                top: 125px !important; /* Increased clearance below tablet nav bar (55px) + more margin */
+            }
+            
+            .restart-button {
+                left: 20px !important; /* Align with focus mode button margin */
+            }
+            
+            .ui-panel {
+                font-size: 8px !important;
+                padding: 10px !important;
+            }
+            
+            /* Shop Icon Bottom-Right tablet adjustments */
+            .shop-icon-right {
+                position: fixed !important;
+                width: 170px !important;
+                height: 170px !important;
+                bottom: 12px !important; /* Move up from bottom on tablet */
+                right: 20px !important; /* Move left from right edge on tablet */
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            
+            .shop-icon-right img {
+                width: 170px !important;
+                height: 170px !important;
+            }
+            
+            /* Centered Shop Panel tablet adjustments */
+            .shop-panel-centered {
+                width: 320px !important;
+                max-width: 90vw !important;
+                max-height: 80vh !important;
+                padding: 12px !important;
+                font-size: 9px !important;
+            }
+            
+            .shop-panel-centered h3 {
+                font-size: 11px !important;
+            }
+            
+            .shop-panel-centered .shop-button {
+                font-size: 8px !important;
+                padding: 8px !important;
+            }
+            
+            /* Ensure proper spacing between resources and inventory panels on tablets */
+            #resources-panel {
+                top: 165px !important;
+            }
+            
+            #inventory-panel {
+                top: 370px !important;
+            }
+            
+
+            
+            #weather-panel.collapsed {
+                right: 8px !important;
+            }
+            
+            #resources-panel.collapsed {
+                left: 10px !important;
+            }
+            
+            /* Adjust panel positions for tablet - keep below top nav bar and buttons */
+            #resources-panel {
+                top: 170px !important; /* Below top nav bar (55px) + restart button (100px) + clearance */
+                left: 8px !important;
+                width: 160px !important;
+            }
+            
+            #shop-panel {
+                bottom: 8px !important;
+                right: 8px !important;
+                width: 180px !important;
+                height: 320px !important;
+            }
+            
+            #inventory-panel {
+                top: 280px !important;
+                left: 8px !important;
+                width: 160px !important;
+            }
+            
+            #weather-panel {
+                top: 170px !important; /* Below top nav bar (55px) + focus mode button (60px) + clearance, align with resources panel */
+                right: 8px !important;
+                width: 180px !important;
+            }
+            
+            #narrative-panel {
+                top: 320px !important; /* Move down to avoid overlap with weather panel on tablet */
+                right: 8px !important;
+                width: 150px !important;
+            }
+            
+            /* Background scaling for tablet - 130% zoom */
+            #game-container {
+                background-size: 130% !important;
+            }
+        }
+        
+        /* Desktop Styles */
+        @media (min-width: 1025px) {
+            /* Keep original desktop positioning - 130% zoom */
+            #game-container {
+                background-size: 130%;
+            }
+        }
+        
+        /* Landscape mobile orientation */
+        @media (max-width: 768px) and (orientation: landscape) {
+            .top-ui-bar {
+                height: 50px !important;
+            }
+            
+            .focus-mode-button, .restart-button {
+                top: 120px !important; /* Increased clearance below landscape nav bar (50px) + more margin */
+            }
+            
+            .restart-button {
+                left: 20px !important; /* Align with focus mode button margin */
+            }
+            
+            .ui-panel {
+                font-size: 7px !important;
+                padding: 6px !important;
+                max-height: 30vh !important;
+            }
+            
+            /* Ensure proper spacing between resources and inventory panels on mobile landscape */
+            #resources-panel {
+                top: 170px !important;
+            }
+            
+            #inventory-panel {
+                top: 380px !important;
+            }
+            
+
+            
+            #weather-panel.collapsed {
+                right: 5px !important;
+            }
+            
+            #resources-panel.collapsed {
+                left: 5px !important;
+            }
+            
+            #resources-panel {
+                top: 130px !important; /* Below top nav bar (50px) + restart button (60px) + clearance in landscape mobile */
+                width: 120px !important;
+            }
+            
+            #shop-panel {
+                width: 140px !important;
+                height: 200px !important;
+            }
+            
+            #inventory-panel {
+                top: 160px !important;
+                width: 120px !important;
+            }
+            
+            #weather-panel {
+                top: 130px !important; /* Below top nav bar (50px) + focus mode button (60px) + clearance, align with resources panel in landscape mobile */
+                right: 5px !important;
+                width: 140px !important;
+            }
+            
+            /* Shop Icon Bottom-Right landscape mobile adjustments */
+            .shop-icon-right {
+                position: fixed !important;
+                width: 120px !important;
+                height: 120px !important;
+                bottom: 8px !important; /* Move up from bottom on landscape mobile */
+                right: 12px !important; /* Move left from right edge on landscape mobile */
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            
+            .shop-icon-right img {
+                width: 120px !important;
+                height: 120px !important;
+            }
+        }
+
+        /* Shop Icon Bottom-Right for very large screens */
+        @media screen and (min-width: 1920px) {
+            .shop-icon-right {
+                position: fixed !important;
+                width: 200px !important;
+                height: 200px !important;
+                bottom: 20px !important; /* Move up from bottom on large screens */
+                right: 30px !important; /* Move left from right edge on large screens */
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+        }
+
+        /* Shop Icon Bottom-Right for ultra-wide screens */
+        @media screen and (min-width: 2560px) {
+            .shop-icon-right {
+                position: fixed !important;
+                width: 220px !important;
+                height: 220px !important;
+                bottom: 25px !important; /* Move up from bottom on ultra-wide screens */
+                right: 35px !important; /* Move left from right edge on ultra-wide screens */
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+        }
+        
+        /* Additional background coverage rules for all scenarios */
+        @media (max-aspect-ratio: 1/1) {
+            /* Portrait orientation - 130% zoom */
+            #game-container {
+                background-size: 130% !important;
+                min-height: 100vh !important;
+                min-width: 100vw !important;
+            }
+        }
+        
+        @media (min-aspect-ratio: 2/1) {
+            /* Very wide screens - 130% zoom */
+            #game-container {
+                background-size: 130% !important;
+                min-height: 100vh !important;
+                min-width: 100vw !important;
+            }
+        }
+        
+        /* Ensure no blue borders on any device */
+        html, body {
+            background-color: #87ceeb !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow-x: hidden !important;
+            overflow-y: hidden !important;
+        }
+        
+        /* Additional responsive breakpoints for comprehensive coverage */
+        
+        /* Very small mobile devices */
+        @media (max-width: 480px) {
+            .top-ui-bar {
+                height: 65px !important;
+                font-size: 7px !important;
+                padding: 0 8px !important;
+            }
+            
+            .focus-mode-button, .restart-button {
+                top: 135px !important; /* Increased clearance below small mobile nav bar (65px) + more margin */
+                font-size: 7px !important;
+                padding: 4px 8px !important;
+            }
+            
+            .restart-button {
+                left: 20px !important; /* Align with focus mode button margin */
+            }
+            
+            /* Very small screens need collapsible panels */
+            .ui-panel {
+                font-size: 7px !important;
+                padding: 6px !important;
+                width: 160px !important;
+                max-height: 30vh !important;
+            }
+            
+            /* Enable collapse functionality only on very small screens */
+            .ui-panel.collapsed {
+                height: 40px !important;
+                overflow: hidden !important;
+                display: flex !important;
+                align-items: center !important;
+                cursor: pointer !important;
+            }
+            
+            .ui-panel.collapsed .panel-content {
+                display: none !important;
+            }
+            
+            .ui-panel.collapsed h3 {
+                margin: 0 !important;
+                font-size: 8px !important;
+                color: #f39c12 !important;
+            }
+            
+            /* Tighter positioning for very small screens */
+            #resources-panel {
+                top: 80px !important;
+                left: 3px !important;
+            }
+            
+            #inventory-panel {
+                top: 220px !important;
+                left: 3px !important;
+            }
+            
+            #weather-panel {
+                top: 80px !important;
+                right: 3px !important;
+            }
+            
+            #shop-panel {
+                bottom: 10px !important;
+                right: 3px !important;
+                height: 150px !important;
+            }
+            
+            #weather-panel {
+                top: 150px !important;
+                font-size: 7px !important;
+                padding: 6px !important;
+            }
+            
+            #resources-panel {
+                width: 200px !important;
+                left: 3px !important;
+            }
+            
+            #weather-panel {
+                width: 200px !important;
+                right: 3px !important;
+            }
+        }
+        
+        /* Large tablets and small desktops */
+        @media (min-width: 1025px) and (max-width: 1440px) {
+            #resources-panel, #weather-panel {
+                top: 185px !important;
+            }
+        }
+        
+        /* Large desktop screens */
+        @media (min-width: 1441px) {
+            .top-ui-bar {
+                height: 55px !important;
+                font-size: 11px !important;
+            }
+            
+            .focus-mode-button, .restart-button {
+                top: 125px !important; /* Increased clearance below large desktop nav bar (55px) + more margin */
+            }
+            
+            .restart-button {
+                left: 20px !important; /* Align with focus mode button margin */
+            }
+            
+            #resources-panel, #weather-panel {
+                top: 190px !important;
+            }
+            
+            #resources-panel {
+                width: 200px !important;
+            }
+            
+            #weather-panel {
+                width: 220px !important;
+            }
+        }
+        
+        /* Ultra-wide screens */
+        @media (min-width: 1920px) {
+            .top-ui-bar {
+                height: 60px !important;
+                font-size: 12px !important;
+            }
+            
+            .focus-mode-button, .restart-button {
+                top: 130px !important; /* Increased clearance below ultra-wide nav bar (60px) + more margin */
+            }
+            
+            .restart-button {
+                left: 20px !important; /* Align with focus mode button margin */
+            }
+            
+            #resources-panel, #weather-panel {
+                top: 200px !important;
+            }
+            
+            #resources-panel {
+                width: 200px !important;
+            }
+            
+            #weather-panel {
+                width: 200px !important;
+            }
+        }
+        
+        /* Portrait tablets */
+        @media (min-width: 769px) and (max-width: 1024px) and (orientation: portrait) {
+            #resources-panel {
+                top: 175px !important;
+            }
+            
+            #weather-panel {
+                top: 175px !important;
+            }
+            
+            #inventory-panel {
+                top: 390px !important;
+            }
+        }
+        
+        /* Landscape tablets */
+        @media (min-width: 769px) and (max-width: 1024px) and (orientation: landscape) {
+            #resources-panel {
+                top: 165px !important;
+            }
+            
+            #weather-panel {
+                top: 165px !important;
+            }
+            
+            #inventory-panel {
+                top: 380px !important;
+            }
+        }
+        
+        /* Very small screens in landscape */
+        @media (max-width: 640px) and (orientation: landscape) {
+            .top-ui-bar {
+                height: 45px !important;
+            }
+            
+            .focus-mode-button, .restart-button {
+                top: 115px !important; /* Increased clearance below very small landscape nav bar (45px) + more margin */
+                font-size: 6px !important;
+                padding: 3px 6px !important;
+            }
+            
+            .restart-button {
+                left: 20px !important; /* Align with focus mode button margin */
+            }
+            
+            /* Ensure collapsed panels maintain positioning in very small landscape */
+            .ui-panel.collapsed {
+                position: absolute !important;
+            }
+            
+            #weather-panel.collapsed {
+                right: 3px !important;
+            }
+            
+            #resources-panel.collapsed {
+                left: 3px !important;
+            }
+            
+            #resources-panel, #weather-panel {
+                top: 120px !important;
+                font-size: 6px !important;
+                padding: 4px !important;
+            }
+            
+            #resources-panel {
+                width: 200px !important;
+            }
+            
+            #weather-panel {
+                width: 200px !important;
+            }
         }
     </style>
 </body>
